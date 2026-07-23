@@ -30,6 +30,7 @@ model Usuario {
 model Categoria {
   id_categoria Int       @id @default(autoincrement())
   nombre       String    @unique @db.VarChar(50)
+  estado       Boolean   @default(true)
   productos    Producto[]
 
   @@map("categoria")
@@ -44,6 +45,8 @@ model Producto {
   stock_minimo       Int       @default(5)
   fecha_vencimiento  DateTime? @db.Date
   id_categoria       Int
+  url_imagen         String?   @db.VarChar(255)
+  estado             Boolean   @default(true)
 
   categoria          Categoria       @relation(fields: [id_categoria], references: [id_categoria])
   detallesVenta      DetalleVenta[]
@@ -59,6 +62,7 @@ model Cliente {
   telefono        String? @db.VarChar(20)
   numero_compras  Int     @default(0)
   puntos          Int     @default(0)
+  estado          Boolean @default(true)
   ventas          Venta[]
 
   @@map("cliente")
@@ -97,6 +101,7 @@ model Proveedor {
   id_proveedor Int      @id @default(autoincrement())
   nombre       String   @db.VarChar(100)
   contacto     String?  @db.VarChar(100)
+  estado       Boolean  @default(true)
   pedidos      Pedido[]
 
   @@map("proveedor")
