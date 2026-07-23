@@ -1,7 +1,3 @@
-// Prisma schema - generado a partir del modelo logico acordado en el proyecto
-// Ejecutar: npx prisma db pull   (si la BD ya existe con el script SQL de Enterprise Architect)
-// o:        npx prisma migrate dev  (si se quiere que Prisma cree las tablas desde aqui)
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,93 +8,94 @@ datasource db {
 }
 
 model Usuario {
-  id_usuario  Int      @id @default(autoincrement())
-  nombre      String   @db.VarChar(100)
-  login       String   @unique @db.VarChar(50)
-  contrasena  String   @db.VarChar(255)
-  rol         String   @db.VarChar(20) // 'Administrador' | 'Vendedor'
-  estado      Boolean  @default(true)
-
-  ventas          Venta[]
-  pedidos         Pedido[]
-  alertas         Alerta[]
-  reportes        ReporteVentas[]
+  id_usuario Int             @id(map: "PK_usuario") @default(autoincrement())
+  nombre     String          @db.VarChar(100)
+  login      String          @unique(map: "UQ_login") @db.VarChar(50)
+  contrasena String          @db.VarChar(255)
+  rol        String          @db.VarChar(20)
+  estado     Boolean         @default(true)
+  alertas    Alerta[]
+  pedidos    Pedido[]
+  reportes   ReporteVentas[]
+  ventas     Venta[]
 
   @@map("usuario")
 }
 
 model Categoria {
-  id_categoria Int       @id @default(autoincrement())
-  nombre       String    @unique @db.VarChar(50)
-  estado       Boolean   @default(true)
+  id_categoria Int        @id(map: "PK_categoria") @default(autoincrement())
+  nombre       String     @unique(map: "UQ_nombre") @db.VarChar(50)
+  estado       Boolean    @default(true)
   productos    Producto[]
 
   @@map("categoria")
 }
 
 model Producto {
-  id_producto        Int       @id @default(autoincrement())
-  nombre             String    @db.VarChar(100)
-  precio_compra      Decimal   @db.Decimal(10, 2)
-  precio_venta       Decimal   @db.Decimal(10, 2)
-  stock              Int       @default(0)
-  stock_minimo       Int       @default(5)
-  fecha_vencimiento  DateTime? @db.Date
-  id_categoria       Int
-  url_imagen         String?   @db.VarChar(255)
-  estado             Boolean   @default(true)
+  id_producto       Int             @id(map: "PK_producto") @default(autoincrement())
+  nombre            String          @db.VarChar(100)
+  precio_compra     Decimal         @db.Decimal(10, 2)
+  precio_venta      Decimal         @db.Decimal(10, 2)
+  stock             Int             @default(0)
+  stock_minimo      Int             @default(5)
+  fecha_vencimiento DateTime?       @db.Date
+  id_categoria      Int
+  url_imagen        String?         @db.VarChar(255)
+  estado            Boolean         @default(true)
+  alertas           Alerta[]
+  detallesPedido    DetallePedido[]
+  detallesVenta     DetalleVenta[]
+  categoria         Categoria       @relation(fields: [id_categoria], references: [id_categoria], onUpdate: NoAction, map: "FK_producto_categoria")
 
-  categoria          Categoria       @relation(fields: [id_categoria], references: [id_categoria])
-  detallesVenta      DetalleVenta[]
-  detallesPedido      DetallePedido[]
-  alertas            Alerta[]
-
+  @@index([id_categoria], map: "IXFK_producto_categoria")
   @@map("producto")
 }
 
 model Cliente {
-  id_cliente      Int     @id @default(autoincrement())
-  nombre          String  @db.VarChar(100)
-  telefono        String? @db.VarChar(20)
-  numero_compras  Int     @default(0)
-  puntos          Int     @default(0)
-  estado          Boolean @default(true)
-  ventas          Venta[]
+  id_cliente     Int     @id(map: "PK_cliente") @default(autoincrement())
+  nombre         String  @db.VarChar(100)
+  telefono       String? @db.VarChar(20)
+  numero_compras Int     @default(0)
+  puntos         Int     @default(0)
+  estado         Boolean @default(true)
+  ventas         Venta[]
 
   @@map("cliente")
 }
 
 model Venta {
-  id_venta    Int      @id @default(autoincrement())
-  fecha       DateTime @default(now())
-  total       Decimal  @db.Decimal(10, 2)
-  id_usuario  Int
-  id_cliente  Int?
-
-  usuario         Usuario              @relation(fields: [id_usuario], references: [id_usuario])
-  cliente         Cliente?             @relation(fields: [id_cliente], references: [id_cliente])
+  id_venta        Int                   @id(map: "PK_venta") @default(autoincrement())
+  fecha           DateTime              @default(now()) @db.Timestamp(6)
+  total           Decimal               @db.Decimal(10, 2)
+  id_usuario      Int
+  id_cliente      Int?
   detalles        DetalleVenta[]
   reportesDetalle ReporteVentaDetalle[]
+  cliente         Cliente?              @relation(fields: [id_cliente], references: [id_cliente], onUpdate: NoAction, map: "FK_venta_cliente")
+  usuario         Usuario               @relation(fields: [id_usuario], references: [id_usuario], onUpdate: NoAction, map: "FK_venta_usuario")
 
+  @@index([id_cliente], map: "IXFK_venta_cliente")
+  @@index([id_usuario], map: "IXFK_venta_usuario")
   @@map("venta")
 }
 
 model DetalleVenta {
-  id_detalle       Int     @id @default(autoincrement())
-  id_venta         Int
-  id_producto      Int
-  cantidad         Int
-  precio_unitario  Decimal @db.Decimal(10, 2)
-  subtotal         Decimal @db.Decimal(10, 2)
+  id_detalle      Int      @id(map: "PK_detalle_venta") @default(autoincrement())
+  id_venta        Int
+  id_producto     Int
+  cantidad        Int
+  precio_unitario Decimal  @db.Decimal(10, 2)
+  subtotal        Decimal  @db.Decimal(10, 2)
+  producto        Producto @relation(fields: [id_producto], references: [id_producto], onUpdate: NoAction, map: "FK_detalle_venta_producto")
+  venta           Venta    @relation(fields: [id_venta], references: [id_venta], onDelete: Cascade, onUpdate: NoAction, map: "FK_detalle_venta_venta")
 
-  venta    Venta    @relation(fields: [id_venta], references: [id_venta], onDelete: Cascade)
-  producto Producto @relation(fields: [id_producto], references: [id_producto])
-
+  @@index([id_producto], map: "IXFK_detalle_venta_producto")
+  @@index([id_venta], map: "IXFK_detalle_venta_venta")
   @@map("detalle_venta")
 }
 
 model Proveedor {
-  id_proveedor Int      @id @default(autoincrement())
+  id_proveedor Int      @id(map: "PK_proveedor") @default(autoincrement())
   nombre       String   @db.VarChar(100)
   contacto     String?  @db.VarChar(100)
   estado       Boolean  @default(true)
@@ -108,66 +105,70 @@ model Proveedor {
 }
 
 model Pedido {
-  id_pedido     Int      @id @default(autoincrement())
-  fecha         DateTime @default(now())
-  estado        String   @db.VarChar(20) // 'Pendiente' | 'Recibido' | 'Cancelado'
-  id_usuario    Int
-  id_proveedor  Int
+  id_pedido    Int             @id(map: "PK_pedido") @default(autoincrement())
+  fecha        DateTime        @default(now()) @db.Timestamp(6)
+  estado       String          @db.VarChar(20)
+  id_usuario   Int
+  id_proveedor Int
+  detalles     DetallePedido[]
+  proveedor    Proveedor       @relation(fields: [id_proveedor], references: [id_proveedor], onUpdate: NoAction, map: "FK_pedido_proveedor")
+  usuario      Usuario         @relation(fields: [id_usuario], references: [id_usuario], onUpdate: NoAction, map: "FK_pedido_usuario")
 
-  usuario   Usuario         @relation(fields: [id_usuario], references: [id_usuario])
-  proveedor Proveedor       @relation(fields: [id_proveedor], references: [id_proveedor])
-  detalles  DetallePedido[]
-
+  @@index([id_proveedor], map: "IXFK_pedido_proveedor")
+  @@index([id_usuario], map: "IXFK_pedido_usuario")
   @@map("pedido")
 }
 
 model DetallePedido {
-  id_detalle_pedido Int @id @default(autoincrement())
+  id_detalle_pedido Int      @id(map: "PK_detalle_pedido") @default(autoincrement())
   id_pedido         Int
   id_producto       Int
   cantidad_pedida   Int
+  pedido            Pedido   @relation(fields: [id_pedido], references: [id_pedido], onDelete: Cascade, onUpdate: NoAction, map: "FK_detalle_pedido_pedido")
+  producto          Producto @relation(fields: [id_producto], references: [id_producto], onUpdate: NoAction, map: "FK_detalle_pedido_producto")
 
-  pedido   Pedido   @relation(fields: [id_pedido], references: [id_pedido], onDelete: Cascade)
-  producto Producto @relation(fields: [id_producto], references: [id_producto])
-
+  @@index([id_pedido], map: "IXFK_detalle_pedido_pedido")
+  @@index([id_producto], map: "IXFK_detalle_pedido_producto")
   @@map("detalle_pedido")
 }
 
 model Alerta {
-  id_alerta         Int      @id @default(autoincrement())
-  tipo              String   @db.VarChar(20) // 'StockBajo' | 'Vencimiento'
-  fecha_generacion  DateTime @default(now())
-  mensaje           String   @db.VarChar(255)
-  id_producto       Int
-  id_usuario        Int
+  id_alerta        Int      @id(map: "PK_alerta") @default(autoincrement())
+  tipo             String   @db.VarChar(20)
+  fecha_generacion DateTime @default(now()) @db.Timestamp(6)
+  mensaje          String   @db.VarChar(255)
+  id_producto      Int
+  id_usuario       Int
+  producto         Producto @relation(fields: [id_producto], references: [id_producto], onDelete: Cascade, onUpdate: NoAction, map: "FK_alerta_producto")
+  usuario          Usuario  @relation(fields: [id_usuario], references: [id_usuario], onUpdate: NoAction, map: "FK_alerta_usuario")
 
-  producto Producto @relation(fields: [id_producto], references: [id_producto], onDelete: Cascade)
-  usuario  Usuario  @relation(fields: [id_usuario], references: [id_usuario])
-
+  @@index([id_producto], map: "IXFK_alerta_producto")
+  @@index([id_usuario], map: "IXFK_alerta_usuario")
   @@map("alerta")
 }
 
 model ReporteVentas {
-  id_reporte        Int      @id @default(autoincrement())
-  periodo           String   @db.VarChar(20) // 'Diario' | 'Semanal' | 'Mensual'
-  fecha_generacion  DateTime @default(now())
-  total_ventas      Decimal  @db.Decimal(10, 2)
-  ganancia_total    Decimal  @db.Decimal(10, 2)
-  id_usuario        Int
+  id_reporte       Int                   @id(map: "PK_reporte_ventas") @default(autoincrement())
+  periodo          String                @db.VarChar(20)
+  fecha_generacion DateTime              @default(now()) @db.Timestamp(6)
+  total_ventas     Decimal               @db.Decimal(10, 2)
+  ganancia_total   Decimal               @db.Decimal(10, 2)
+  id_usuario       Int
+  ventas           ReporteVentaDetalle[]
+  usuario          Usuario               @relation(fields: [id_usuario], references: [id_usuario], onUpdate: NoAction, map: "FK_reporte_ventas_usuario")
 
-  usuario Usuario               @relation(fields: [id_usuario], references: [id_usuario])
-  ventas  ReporteVentaDetalle[]
-
+  @@index([id_usuario], map: "IXFK_reporte_ventas_usuario")
   @@map("reporte_ventas")
 }
 
 model ReporteVentaDetalle {
   id_reporte Int
   id_venta   Int
+  reporte    ReporteVentas @relation(fields: [id_reporte], references: [id_reporte], onDelete: Cascade, onUpdate: NoAction, map: "FK_reporte_venta_detalle_reporte_ventas")
+  venta      Venta         @relation(fields: [id_venta], references: [id_venta], onUpdate: NoAction, map: "FK_reporte_venta_detalle_venta")
 
-  reporte ReporteVentas @relation(fields: [id_reporte], references: [id_reporte], onDelete: Cascade)
-  venta   Venta         @relation(fields: [id_venta], references: [id_venta])
-
-  @@id([id_reporte, id_venta])
+  @@id([id_reporte, id_venta], map: "PK_reporte_venta_detalle")
+  @@index([id_reporte], map: "IXFK_reporte_venta_detalle_reporte_ventas")
+  @@index([id_venta], map: "IXFK_reporte_venta_detalle_venta")
   @@map("reporte_venta_detalle")
 }
