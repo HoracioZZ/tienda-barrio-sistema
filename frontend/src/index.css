@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------
+   Identidad visual del proyecto - Tienda de Barrio
+   Paleta y tipografia definidas para dar coherencia a
+   todas las pantallas, sin importar quien las construya.
+--------------------------------------------------------- */
+@theme {
+  --color-primary: #1B6E5C;       /* Verde Trebol - botones, encabezados, navegacion */
+  --color-primary-dark: #124F42;  /* Verde Bosque - hover/activo */
+  --color-accent: #E8A33D;        /* Mango - destacar info importante (cliente frecuente, badges) */
+  --color-danger: #D6553F;        /* Tomate - alertas de stock bajo, vencimiento, errores */
+  --color-success: #4C9A72;       /* Verde Menta - confirmaciones, venta exitosa */
+  --color-cream: #FAF7F1;         /* Fondo general de la app */
+  --color-ink: #2A2A26;           /* Texto principal */
+  --color-stone: #6B6B62;         /* Texto secundario / placeholders */
+
+  --font-display: "Plus Jakarta Sans", sans-serif; /* Titulos y encabezados */
+  --font-sans: "Inter", sans-serif;                 /* Texto de UI y formularios */
+  --font-mono: "JetBrains Mono", monospace;         /* Precios, totales, montos */
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  margin: 0;
+}
