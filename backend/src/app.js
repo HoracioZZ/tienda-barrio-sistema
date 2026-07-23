@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth.routes');
 const ventaRoutes = require('./routes/venta.routes');
@@ -11,6 +12,7 @@ const reporteRoutes = require('./routes/reporte.routes');
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 app.use(express.json());
 
 // Ruta de salud, util para probar que el backend levanto correctamente
