@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth.routes');
 const ventaRoutes = require('./routes/venta.routes');
@@ -11,6 +12,7 @@ const reporteRoutes = require('./routes/reporte.routes');
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 app.use(express.json());
 
 // Ruta de salud, util para probar que el backend levanto correctamente
@@ -27,4 +29,12 @@ app.use('/api/pedidos', pedidoRoutes);     // EPIC-5 - Persona 5
 app.use('/api/reportes', reporteRoutes);   // EPIC-6 - Persona 6
 app.use('/api/categorias', require('./routes/categoria.routes'));
 module.exports = app;
+app.use('/api/alertas', require('./routes/alerta.routes'));
+const cron = require('node-cron');
+const alertaService = require('./services/alerta.service');
 
+cron.schedule('0 7 * * *', async () => {
+  console.log('[JOB] Verificando stock bajo y vencimientos...');
+  const resultado = await alertaService.ejecutarVerificacionCompleta();
+  console.log('[JOB] Resultado:', resultado);
+});

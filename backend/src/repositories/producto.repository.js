@@ -36,7 +36,17 @@ async function stockBajo() {
   return prisma.$queryRaw`SELECT * FROM producto WHERE stock <= stock_minimo AND estado = true`;
 }
 
+async function productosPorVencer(diasAnticipacion = 7) {
+  const limite = new Date();
+  limite.setDate(limite.getDate() + diasAnticipacion);
+  return prisma.producto.findMany({
+    where: {
+      estado: true,
+      fecha_vencimiento: { not: null, lte: limite },
+    },
+  });
+}
 module.exports = {
   crear, listar, listarPorCategoria, obtenerPorId,
-  buscarPorNombre, actualizar, eliminar, stockBajo,
+  buscarPorNombre, actualizar, eliminar, stockBajo,productosPorVencer,
 };
