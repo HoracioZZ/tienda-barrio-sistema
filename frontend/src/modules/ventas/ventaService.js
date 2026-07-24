@@ -10,3 +10,9 @@ export async function listarVentas() {
   const { data } = await api.get("/ventas");
   return data;
 }
+
+// RF-4: buscar productos por nombre
+export async function buscarProductos(nombre) {
+  const { data } = await api.get("/ventas/productos", { params: { nombre } });
+  return data;
+}

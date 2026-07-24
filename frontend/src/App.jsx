@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import VentasPage from "./pages/VentasPage";
 import RutaProtegida from "./components/RutaProtegida";
 
 function App() {
@@ -8,7 +9,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-
         <Route
           path="/dashboard"
           element={
@@ -27,6 +27,14 @@ function App() {
         } /> */}
 
         {/* Administrador y Vendedor pueden entrar a ventas */}
+        <Route
+          path="/ventas"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador", "Vendedor"]}>
+              <VentasPage />
+            </RutaProtegida>
+          }
+        />
         {/* <Route path="/ventas" element={
           <RutaProtegida rolesPermitidos={['Administrador', 'Vendedor']}>
             <VentasPage />

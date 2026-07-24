@@ -18,4 +18,14 @@ async function listar(req, res) {
   res.json(ventas);
 }
 
-module.exports = { registrar, listar };
+// RF-4: buscar productos por nombre (query param ?nombre=...)
+async function buscarProductos(req, res) {
+  try {
+    const productos = await ventaService.buscarProductos(req.query.nombre);
+    res.json(productos);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { registrar, listar, buscarProductos };
