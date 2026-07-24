@@ -25,5 +25,6 @@ app.use('/api/productos', productoRoutes); // EPIC-2 - Persona 2
 app.use('/api/clientes', clienteRoutes);   // EPIC-4 - Persona 4
 app.use('/api/pedidos', pedidoRoutes);     // EPIC-5 - Persona 5
 app.use('/api/reportes', reporteRoutes);   // EPIC-6 - Persona 6
-
+app.use('/api/categorias', require('./routes/categoria.routes'));
 module.exports = app;
+

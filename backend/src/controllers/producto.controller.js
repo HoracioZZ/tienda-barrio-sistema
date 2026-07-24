@@ -22,3 +22,4 @@ async function alertasStockBajo(req, res) {
 }
 
 module.exports = { registrar, listar, buscar, alertasStockBajo };
+      

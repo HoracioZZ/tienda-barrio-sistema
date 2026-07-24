@@ -17,7 +17,6 @@ async function actualizar(id, data) {
 }
 
 async function eliminar(id) {
-  
   return prisma.categoria.update({ where: { id_categoria: Number(id) }, data: { estado: false } });
 }
 
