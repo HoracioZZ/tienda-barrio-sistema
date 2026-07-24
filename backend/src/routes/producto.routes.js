@@ -8,8 +8,11 @@ router.use(verificarToken);
 router.get('/', productoController.listar);
 router.get('/buscar', productoController.buscar);
 router.get('/alertas/stock-bajo', productoController.alertasStockBajo);
+router.get('/categoria/:id_categoria', productoController.listarPorCategoria);
 
-// Solo Administrador puede crear productos (gestion de catalogo)
+// Admin
 router.post('/', permitirRoles('Administrador'), productoController.registrar);
+router.put('/:id', permitirRoles('Administrador'), productoController.actualizar);
+router.delete('/:id', permitirRoles('Administrador'), productoController.eliminar);
 
 module.exports = router;
