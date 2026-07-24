@@ -11,6 +11,11 @@ export async function listarPedidos() {
   return data;
 }
 
+export async function listarProveedores() {
+  const { data } = await api.get("/pedidos/proveedores");
+  return data;
+}
+
 // RF-10
 export async function sugerenciasDePedido() {
   const { data } = await api.get("/pedidos/sugerencias");

@@ -7,6 +7,8 @@ router.use(verificarToken, permitirRoles('Administrador'));
 
 router.get('/', pedidoController.listar);
 router.get('/sugerencias', pedidoController.sugerencias);
+router.get('/proveedores', pedidoController.proveedores);
+router.get('/:id', pedidoController.obtener);
 router.post('/', pedidoController.registrar);
 
 module.exports = router;

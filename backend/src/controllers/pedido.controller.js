@@ -9,16 +9,41 @@ async function registrar(req, res) {
     });
     res.status(201).json(pedido);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message || 'Error al registrar el pedido.' });
   }
 }
 
 async function listar(req, res) {
-  res.json(await pedidoService.listarPedidos());
+  try {
+    res.json(await pedidoService.listarPedidos());
+  } catch (error) {
+    res.status(500).json({ error: 'Error al listar pedidos.' });
+  }
+}
+
+async function obtener(req, res) {
+  try {
+    const pedido = await pedidoService.obtenerPedido(req.params.id);
+    res.json(pedido);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || 'Error al obtener el pedido.' });
+  }
 }
 
 async function sugerencias(req, res) {
-  res.json(await pedidoService.sugerenciaDePedido());
+  try {
+    res.json(await pedidoService.sugerenciaDePedido());
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener sugerencias.' });
+  }
 }
 
-module.exports = { registrar, listar, sugerencias };
+async function proveedores(req, res) {
+  try {
+    res.json(await pedidoService.listarProveedores());
+  } catch (error) {
+    res.status(500).json({ error: 'Error al listar proveedores.' });
+  }
+}
+
+module.exports = { registrar, listar, obtener, sugerencias, proveedores };
