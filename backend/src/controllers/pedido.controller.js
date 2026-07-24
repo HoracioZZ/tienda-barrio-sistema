@@ -30,6 +30,15 @@ async function obtener(req, res) {
   }
 }
 
+async function cambiarEstado(req, res) {
+  try {
+    const pedido = await pedidoService.cambiarEstadoPedido(req.params.id, req.body.estado);
+    res.json(pedido);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || 'Error al cambiar el estado.' });
+  }
+}
+
 async function sugerencias(req, res) {
   try {
     res.json(await pedidoService.sugerenciaDePedido());
@@ -46,4 +55,30 @@ async function proveedores(req, res) {
   }
 }
 
-module.exports = { registrar, listar, obtener, sugerencias, proveedores };
+async function crearProveedor(req, res) {
+  try {
+    const proveedor = await pedidoService.registrarProveedor(req.body);
+    res.status(201).json(proveedor);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || 'Error al registrar el proveedor.' });
+  }
+}
+
+async function productos(req, res) {
+  try {
+    res.json(await pedidoService.listarProductosDisponibles());
+  } catch (error) {
+    res.status(500).json({ error: 'Error al listar productos.' });
+  }
+}
+
+module.exports = {
+  registrar,
+  listar,
+  obtener,
+  cambiarEstado,
+  sugerencias,
+  proveedores,
+  crearProveedor,
+  productos,
+};

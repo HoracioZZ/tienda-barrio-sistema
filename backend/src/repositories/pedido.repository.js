@@ -25,4 +25,20 @@ async function obtenerPorId(id_pedido) {
   });
 }
 
-module.exports = { crear, listar, obtenerPorId };
+async function actualizarEstado(id_pedido, estado) {
+  return prisma.pedido.update({
+    where: { id_pedido: Number(id_pedido) },
+    data: { estado },
+    include: { detalles: { include: { producto: true } }, proveedor: true },
+  });
+}
+
+// Nota: consulta directa de solo lectura a la tabla producto (no toca archivos de Wendy)
+async function listarProductosActivos() {
+  return prisma.producto.findMany({
+    where: { estado: true },
+    orderBy: { nombre: 'asc' },
+  });
+}
+
+module.exports = { crear, listar, obtenerPorId, actualizarEstado, listarProductosActivos };

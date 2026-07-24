@@ -35,7 +35,7 @@ export default function HeaderModulo({ titulo, notificaciones = null }) {
           <div className="relative" ref={ref}>
             <button
               onClick={() => setAbierto((v) => !v)}
-              className="relative"
+              className="relative translate-y-0.5"
               aria-label="Notificaciones"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-stone">

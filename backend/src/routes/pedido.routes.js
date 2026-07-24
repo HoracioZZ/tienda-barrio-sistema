@@ -8,7 +8,10 @@ router.use(verificarToken, permitirRoles('Administrador'));
 router.get('/', pedidoController.listar);
 router.get('/sugerencias', pedidoController.sugerencias);
 router.get('/proveedores', pedidoController.proveedores);
+router.post('/proveedores', pedidoController.crearProveedor);
+router.get('/productos', pedidoController.productos);
 router.get('/:id', pedidoController.obtener);
 router.post('/', pedidoController.registrar);
+router.patch('/:id/estado', pedidoController.cambiarEstado);
 
 module.exports = router;

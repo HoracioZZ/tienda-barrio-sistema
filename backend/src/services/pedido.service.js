@@ -3,6 +3,20 @@ const productoRepository = require('../repositories/producto.repository');
 const proveedorRepository = require('../repositories/proveedor.repository');
 const prisma = require('../config/prismaClient');
 
+const ESTADOS_VALIDOS = ['Pendiente', 'Recibido', 'Cancelado'];
+
+// Calcula precios sobre la marcha (no se guardan en la BD, el esquema no tiene esas columnas)
+function conTotales(pedido) {
+  if (!pedido) return pedido;
+  const detalles = (pedido.detalles || []).map((d) => {
+    const precio_compra = Number(d.producto?.precio_compra || 0);
+    const subtotal_estimado = precio_compra * d.cantidad_pedida;
+    return { ...d, subtotal_estimado };
+  });
+  const total_estimado = detalles.reduce((acc, d) => acc + d.subtotal_estimado, 0);
+  return { ...pedido, detalles, total_estimado };
+}
+
 // RF-11: registrar pedido a proveedor
 async function registrarPedido({ id_usuario, id_proveedor, items }) {
   if (!id_proveedor) {
@@ -32,7 +46,7 @@ async function registrarPedido({ id_usuario, id_proveedor, items }) {
     throw { status: 404, message: 'Uno o más productos no existen.' };
   }
 
-  return pedidoRepository.crear({
+  const pedido = await pedidoRepository.crear({
     id_usuario,
     id_proveedor: Number(id_proveedor),
     estado: 'Pendiente',
@@ -43,19 +57,33 @@ async function registrarPedido({ id_usuario, id_proveedor, items }) {
       })),
     },
   });
+
+  return conTotales(pedido);
 }
 
 async function listarPedidos() {
-  return pedidoRepository.listar();
+  const pedidos = await pedidoRepository.listar();
+  return pedidos.map(conTotales);
 }
 
 async function obtenerPedido(id_pedido) {
   const pedido = await pedidoRepository.obtenerPorId(id_pedido);
   if (!pedido) throw { status: 404, message: 'Pedido no encontrado.' };
-  return pedido;
+  return conTotales(pedido);
 }
 
-// RF-10: sugerencia de pedido segun stock bajo
+async function cambiarEstadoPedido(id_pedido, estado) {
+  if (!ESTADOS_VALIDOS.includes(estado)) {
+    throw { status: 400, message: `Estado inválido. Usa: ${ESTADOS_VALIDOS.join(', ')}.` };
+  }
+  const existente = await pedidoRepository.obtenerPorId(id_pedido);
+  if (!existente) throw { status: 404, message: 'Pedido no encontrado.' };
+
+  const actualizado = await pedidoRepository.actualizarEstado(id_pedido, estado);
+  return conTotales(actualizado);
+}
+
+// RF-10: sugerencia de pedido segun stock bajo (pendiente: depende de productoRepository.stockBajo())
 async function sugerenciaDePedido() {
   return productoRepository.stockBajo();
 }
@@ -64,10 +92,24 @@ async function listarProveedores() {
   return proveedorRepository.listarActivos();
 }
 
+async function registrarProveedor({ nombre, contacto }) {
+  if (!nombre || !nombre.trim()) {
+    throw { status: 400, message: 'El nombre del proveedor es obligatorio.' };
+  }
+  return proveedorRepository.crear({ nombre: nombre.trim(), contacto: contacto || null, estado: true });
+}
+
+async function listarProductosDisponibles() {
+  return pedidoRepository.listarProductosActivos();
+}
+
 module.exports = {
   registrarPedido,
   listarPedidos,
   obtenerPedido,
+  cambiarEstadoPedido,
   sugerenciaDePedido,
   listarProveedores,
+  registrarProveedor,
+  listarProductosDisponibles,
 };

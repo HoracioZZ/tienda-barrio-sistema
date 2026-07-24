@@ -3,30 +3,45 @@ import {
   registrarPedido,
   listarPedidos,
   listarProveedores,
+  registrarProveedor,
+  listarProductos,
+  cambiarEstadoPedido,
 } from "../modules/compras/pedidoService";
-import { getUsuarioActual } from "../modules/auth/authService";
 import SidebarCompras from "../components/SidebarCompras";
+import HeaderModulo from "../components/HeaderModulo";
 
 function Pedidos() {
   const [proveedores, setProveedores] = useState([]);
+  const [productos, setProductos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
+
   const [idProveedor, setIdProveedor] = useState("");
-  const [idProducto, setIdProducto] = useState("");
+  const [busquedaProducto, setBusquedaProducto] = useState("");
+  const [idProductoSeleccionado, setIdProductoSeleccionado] = useState("");
+  const [mostrarListaProductos, setMostrarListaProductos] = useState(false);
   const [cantidad, setCantidad] = useState("");
-  const [busqueda, setBusqueda] = useState("");
+
+  const [busquedaFecha, setBusquedaFecha] = useState("");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState("");
 
-  const usuario = getUsuarioActual();
-  const iniciales = usuario?.nombre
-    ? usuario.nombre.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase()
-    : "AD";
+  const [modalProveedorAbierto, setModalProveedorAbierto] = useState(false);
+  const [nuevoProvNombre, setNuevoProvNombre] = useState("");
+  const [nuevoProvContacto, setNuevoProvContacto] = useState("");
+  const [errorProveedor, setErrorProveedor] = useState("");
+
+  const [menuAbiertoId, setMenuAbiertoId] = useState(null);
 
   async function cargarDatos() {
     try {
-      const [prov, ped] = await Promise.all([listarProveedores(), listarPedidos()]);
+      const [prov, prod, ped] = await Promise.all([
+        listarProveedores(),
+        listarProductos(),
+        listarPedidos(),
+      ]);
       setProveedores(prov);
+      setProductos(prod);
       setPedidos(ped);
     } catch (err) {
       setError("No se pudieron cargar los datos.");
@@ -37,12 +52,31 @@ function Pedidos() {
     cargarDatos();
   }, []);
 
+  const productoSeleccionado = productos.find(
+    (p) => p.id_producto === Number(idProductoSeleccionado)
+  );
+
+  const productosFiltrados = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase())
+  );
+
+  function seleccionarProducto(p) {
+    setIdProductoSeleccionado(p.id_producto);
+    setBusquedaProducto(p.nombre);
+    setMostrarListaProductos(false);
+  }
+
+  const totalEstimadoNuevo =
+    productoSeleccionado && cantidad
+      ? Number(productoSeleccionado.precio_compra) * Number(cantidad)
+      : 0;
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setExito("");
 
-    if (!idProveedor || !idProducto || !cantidad) {
+    if (!idProveedor || !idProductoSeleccionado || !cantidad) {
       setError("Completa todos los campos.");
       return;
     }
@@ -51,10 +85,13 @@ function Pedidos() {
     try {
       await registrarPedido({
         id_proveedor: Number(idProveedor),
-        items: [{ id_producto: Number(idProducto), cantidad_pedida: Number(cantidad) }],
+        items: [
+          { id_producto: Number(idProductoSeleccionado), cantidad_pedida: Number(cantidad) },
+        ],
       });
       setExito("Pedido registrado correctamente.");
-      setIdProducto("");
+      setBusquedaProducto("");
+      setIdProductoSeleccionado("");
       setCantidad("");
       cargarDatos();
     } catch (err) {
@@ -64,56 +101,58 @@ function Pedidos() {
     }
   }
 
-  const pedidosFiltrados = pedidos.filter((p) => {
-    const texto = busqueda.toLowerCase();
-    return (
-      p.proveedor?.nombre?.toLowerCase().includes(texto) ||
-      String(p.id_pedido).includes(texto) ||
-      p.estado?.toLowerCase().includes(texto)
-    );
-  });
+  async function handleCrearProveedor(e) {
+    e.preventDefault();
+    setErrorProveedor("");
+    if (!nuevoProvNombre.trim()) {
+      setErrorProveedor("El nombre es obligatorio.");
+      return;
+    }
+    try {
+      await registrarProveedor({ nombre: nuevoProvNombre, contacto: nuevoProvContacto });
+      setModalProveedorAbierto(false);
+      setNuevoProvNombre("");
+      setNuevoProvContacto("");
+      cargarDatos();
+    } catch (err) {
+      setErrorProveedor(err.response?.data?.error || "Error al registrar el proveedor.");
+    }
+  }
+
+  async function handleCambiarEstado(id_pedido, estado) {
+    try {
+      await cambiarEstadoPedido(id_pedido, estado);
+      setMenuAbiertoId(null);
+      cargarDatos();
+    } catch (err) {
+      setError(err.response?.data?.error || "Error al cambiar el estado.");
+    }
+  }
+
+function fechaLocalISO(fecha) {
+  const d = new Date(fecha);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+const pedidosFiltrados = pedidos.filter((p) => {
+  if (!busquedaFecha) return true;
+  return fechaLocalISO(p.fecha) === busquedaFecha;
+});
 
   return (
     <div className="flex min-h-screen bg-cream">
       <SidebarCompras />
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b border-stone/10 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-            <h1 className="font-display text-2xl font-bold text-primary">
-              Pedidos a Proveedores
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-5">
-            <div className="relative">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-stone">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {pedidos.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {pedidos.length}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold">
-                {iniciales}
-              </div>
-              <span className="text-ink text-sm font-sans">{usuario?.nombre || "Admin"}</span>
-            </div>
-          </div>
-        </header>
+        <HeaderModulo
+          titulo="Pedidos a Proveedores"
+          notificaciones={pedidos.filter((p) => p.estado === "Pendiente")}
+        />
 
         <div className="p-6">
-          {/* Fila superior: formulario + tarjeta ilustrativa */}
+          {/* Fila superior: formulario + tarjeta */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <form
               onSubmit={handleSubmit}
@@ -146,16 +185,41 @@ function Pedidos() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm text-stone mb-1">ID de producto</label>
+                <div className="relative">
+                  <label className="block text-sm text-stone mb-1">Producto</label>
                   <input
-                    type="number"
-                    placeholder="Ingresa el ID del producto"
-                    value={idProducto}
-                    onChange={(e) => setIdProducto(e.target.value)}
+                    type="text"
+                    placeholder="Busca un producto por nombre"
+                    value={busquedaProducto}
+                    onChange={(e) => {
+                      setBusquedaProducto(e.target.value);
+                      setIdProductoSeleccionado("");
+                      setMostrarListaProductos(true);
+                    }}
+                    onFocus={() => setMostrarListaProductos(true)}
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
+                  {mostrarListaProductos && busquedaProducto && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-stone/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {productosFiltrados.length === 0 ? (
+                        <p className="px-3 py-2 text-stone text-sm font-sans">Sin resultados.</p>
+                      ) : (
+                        productosFiltrados.map((p) => (
+                          <button
+                            type="button"
+                            key={p.id_producto}
+                            onClick={() => seleccionarProducto(p)}
+                            className="w-full text-left px-3 py-2 hover:bg-cream text-sm text-ink font-sans flex justify-between"
+                          >
+                            <span>{p.nombre}</span>
+                            <span className="font-mono text-stone">Bs {p.precio_compra}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
+
                 <div>
                   <label className="block text-sm text-stone mb-1">Cantidad</label>
                   <input
@@ -167,6 +231,17 @@ function Pedidos() {
                   />
                 </div>
               </div>
+
+              {productoSeleccionado && cantidad > 0 && (
+                <p className="text-sm text-stone font-sans">
+                  Precio unitario:{" "}
+                  <span className="font-mono text-ink">Bs {productoSeleccionado.precio_compra}</span>{" "}
+                  — Total estimado:{" "}
+                  <span className="font-mono text-primary font-semibold">
+                    Bs {totalEstimadoNuevo.toFixed(2)}
+                  </span>
+                </p>
+              )}
 
               {error && <p className="text-danger text-sm">{error}</p>}
               {exito && <p className="text-success text-sm">{exito}</p>}
@@ -192,9 +267,19 @@ function Pedidos() {
                 </svg>
               </div>
               <p className="font-display font-semibold text-primary mb-1">Gestiona tus pedidos</p>
-              <p className="text-stone text-sm font-sans">
+              <p className="text-stone text-sm font-sans mb-4">
                 Registra y consulta los pedidos realizados a tus proveedores de forma rápida y organizada.
               </p>
+              <button
+                onClick={() => setModalProveedorAbierto(true)}
+                className="flex items-center gap-2 bg-white border border-primary text-primary font-semibold rounded-lg px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Registrar proveedor
+              </button>
             </div>
           </div>
 
@@ -212,16 +297,25 @@ function Pedidos() {
               </div>
               <div className="relative">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="absolute left-3 top-1/2 -translate-y-1/2 text-stone">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 <input
-                  type="text"
-                  placeholder="Buscar pedido..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
+                  type="date"
+                  value={busquedaFecha}
+                  onChange={(e) => setBusquedaFecha(e.target.value)}
                   className="pl-9 pr-3 py-2 border border-stone/20 rounded-lg text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
+                {busquedaFecha && (
+                  <button
+                    onClick={() => setBusquedaFecha("")}
+                    className="ml-2 text-stone text-xs hover:text-danger"
+                  >
+                    Limpiar
+                  </button>
+                )}
               </div>
             </div>
 
@@ -233,6 +327,7 @@ function Pedidos() {
                   <th className="p-3 text-sm font-sans">Proveedor</th>
                   <th className="p-3 text-sm font-sans">Estado</th>
                   <th className="p-3 text-sm font-sans">Productos</th>
+                  <th className="p-3 text-sm font-sans">Total</th>
                   <th className="p-3 text-sm font-sans">Acciones</th>
                 </tr>
               </thead>
@@ -243,11 +338,15 @@ function Pedidos() {
                     <td className="p-3 text-ink text-sm">{new Date(p.fecha).toLocaleDateString()}</td>
                     <td className="p-3 text-ink text-sm">{p.proveedor?.nombre}</td>
                     <td className="p-3">
-                      <span className="inline-flex items-center gap-1 bg-accent/15 text-accent text-xs font-semibold px-2 py-1 rounded-full">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10" />
-                          <polyline points="12 6 12 12 16 14" />
-                        </svg>
+                      <span
+                        className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                          p.estado === "Recibido"
+                            ? "bg-success/15 text-success"
+                            : p.estado === "Cancelado"
+                            ? "bg-danger/15 text-danger"
+                            : "bg-accent/15 text-accent"
+                        }`}
+                      >
                         {p.estado}
                       </span>
                     </td>
@@ -258,14 +357,42 @@ function Pedidos() {
                         </div>
                       ))}
                     </td>
-                    <td className="p-3">
-                      <button className="text-stone hover:text-ink p-1">
+                    <td className="p-3 font-mono text-primary text-sm font-semibold">
+                      Bs {Number(p.total_estimado || 0).toFixed(2)}
+                    </td>
+                    <td className="p-3 relative">
+                      <button
+                        onClick={() => setMenuAbiertoId(menuAbiertoId === p.id_pedido ? null : p.id_pedido)}
+                        className="text-stone hover:text-ink p-1"
+                      >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                           <circle cx="12" cy="5" r="1.5" />
                           <circle cx="12" cy="12" r="1.5" />
                           <circle cx="12" cy="19" r="1.5" />
                         </svg>
                       </button>
+                      {menuAbiertoId === p.id_pedido && (
+                        <div className="absolute right-0 mt-1 w-40 bg-white border border-stone/20 rounded-lg shadow-lg z-10">
+                          <button
+                            onClick={() => handleCambiarEstado(p.id_pedido, "Recibido")}
+                            className="w-full text-left px-3 py-2 text-sm text-ink hover:bg-cream font-sans"
+                          >
+                            Marcar Recibido
+                          </button>
+                          <button
+                            onClick={() => handleCambiarEstado(p.id_pedido, "Cancelado")}
+                            className="w-full text-left px-3 py-2 text-sm text-danger hover:bg-cream font-sans"
+                          >
+                            Cancelar pedido
+                          </button>
+                          <button
+                            onClick={() => handleCambiarEstado(p.id_pedido, "Pendiente")}
+                            className="w-full text-left px-3 py-2 text-sm text-ink hover:bg-cream font-sans"
+                          >
+                            Marcar Pendiente
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -278,6 +405,54 @@ function Pedidos() {
           </p>
         </div>
       </div>
+
+      {/* Modal registrar proveedor */}
+      {modalProveedorAbierto && (
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h3 className="font-display font-semibold text-ink mb-4">Registrar proveedor</h3>
+            <form onSubmit={handleCrearProveedor} className="space-y-3">
+              <div>
+                <label className="block text-sm text-stone mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={nuevoProvNombre}
+                  onChange={(e) => setNuevoProvNombre(e.target.value)}
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-stone mb-1">Contacto</label>
+                <input
+                  type="text"
+                  value={nuevoProvContacto}
+                  onChange={(e) => setNuevoProvContacto(e.target.value)}
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+              {errorProveedor && <p className="text-danger text-sm">{errorProveedor}</p>}
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalProveedorAbierto(false);
+                    setErrorProveedor("");
+                  }}
+                  className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
+                >
+                  Agregar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

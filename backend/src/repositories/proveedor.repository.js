@@ -7,4 +7,8 @@ async function listarActivos() {
   });
 }
 
-module.exports = { listarActivos };
+async function crear(data) {
+  return prisma.proveedor.create({ data });
+}
+
+module.exports = { listarActivos, crear };
