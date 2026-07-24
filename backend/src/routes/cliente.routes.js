@@ -1,12 +1,17 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const clienteController = require('../controllers/cliente.controller');
-const { verificarToken, permitirRoles } = require('../middlewares/auth.middleware');
+const clienteController = require("../controllers/cliente.controller");
+const { verificarToken, permitirRoles } = require("../middlewares/auth.middleware");
 
-router.use(verificarToken, permitirRoles('Administrador'));
+router.use(verificarToken);
 
-router.get('/', clienteController.listar);
-router.post('/', clienteController.registrar);
-router.patch('/:id/puntos', clienteController.asignarPuntos);
+// Vendedor y Administrador pueden listar clientes
+router.get("/", permitirRoles("Administrador", "Vendedor"), clienteController.listar);
+
+// Solo Administrador puede registrar clientes
+router.post("/", permitirRoles("Administrador"), clienteController.registrar);
+
+// Solo Administrador puede asignar puntos
+router.patch("/:id/puntos", permitirRoles("Administrador"), clienteController.asignarPuntos);
 
 module.exports = router;
