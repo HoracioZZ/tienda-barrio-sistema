@@ -3,7 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import VentasPage from "./pages/VentasPage";
 import RutaProtegida from "./components/RutaProtegida";
-
+import Pedidos from "./pages/Pedidos";
 function App() {
   return (
     <BrowserRouter>
@@ -14,6 +14,14 @@ function App() {
           element={
             <RutaProtegida>
               <Dashboard />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/pedidos"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador"]}>
+              <Pedidos />
             </RutaProtegida>
           }
         />
