@@ -4,7 +4,6 @@ import Dashboard from "./pages/Dashboard";
 import VentasPage from "./pages/VentasPage";
 import RutaProtegida from "./components/RutaProtegida";
 import Pedidos from "./pages/Pedidos";
-
 import Clientes from "./pages/Clientes";
 import Reportes from "./pages/Reportes";
 
@@ -29,12 +28,14 @@ function App() {
             </RutaProtegida>
           }
         />
-        <Route path="/clientes" element={
-          <RutaProtegida rolesPermitidos={['Administrador']}>           
+        <Route
+          path="/clientes"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador"]}>
               <Clientes />
-          </RutaProtegida>
-        } />
-
+            </RutaProtegida>
+          }
+        />
 
         <Route
           path="/reportes"
@@ -53,11 +54,6 @@ function App() {
             </RutaProtegida>
           }
         />
-        {/* <Route path="/ventas" element={
-          <RutaProtegida rolesPermitidos={['Administrador', 'Vendedor']}>
-            <VentasPage />
-          </RutaProtegida>
-        } /> */}
       </Routes>
     </BrowserRouter>
   );

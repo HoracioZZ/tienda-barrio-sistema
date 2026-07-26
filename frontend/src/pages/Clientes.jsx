@@ -81,7 +81,7 @@ export default function Clientes() {
       await api.post("/clientes", form);
       await cargarClientes();
       setForm({ nombre: "", telefono: "" });
-      mostrarMensaje("success", "✅ Cliente registrado exitosamente");
+      mostrarMensaje("success", " Cliente registrado exitosamente");
     } catch (error) {
       console.error("Error registrando cliente:", error);
       mostrarMensaje("error", "Error al registrar el cliente");
@@ -128,7 +128,7 @@ export default function Clientes() {
       await cargarClientes();
       const refreshed = clientes.find(c => c.id_cliente === selected.id_cliente);
       seleccionarCliente(refreshed || null);
-      mostrarMensaje("success", "✅ Cliente actualizado exitosamente");
+      mostrarMensaje("success", " Cliente actualizado exitosamente");
     } catch (err) {
       console.error("Error actualizando cliente:", err);
       mostrarMensaje("error", err.response?.data?.error || "Error al actualizar el cliente");
@@ -148,7 +148,7 @@ export default function Clientes() {
       
       await cargarClientes();
       setSelected(prev => prev ? { ...prev, estado: !prev.estado } : prev);
-      mostrarMensaje("success", `✅ Cliente ${selected.estado !== false ? 'desactivado' : 'activado'} exitosamente`);
+      mostrarMensaje("success", ` Cliente ${selected.estado !== false ? 'desactivado' : 'activado'} exitosamente`);
     } catch (err) {
       console.error("Error cambiando estado:", err);
       mostrarMensaje("error", "Error al cambiar el estado del cliente");
@@ -168,7 +168,7 @@ export default function Clientes() {
       await api.delete(`/clientes/${selected.id_cliente}`);
       await cargarClientes();
       setSelected(null);
-      mostrarMensaje("success", "✅ Cliente eliminado exitosamente");
+      mostrarMensaje("success", " Cliente eliminado exitosamente");
     } catch (err) {
       console.error("Error eliminando cliente:", err);
       mostrarMensaje("error", "Error al eliminar el cliente");
@@ -196,11 +196,11 @@ export default function Clientes() {
     <div className="flex min-h-screen bg-cream">
       <SidebarClientes />
       <div className="flex-1">
-        <HeaderModulo titulo="👥 Gestión de Clientes" />
+        <HeaderModulo titulo=" Gestión de Clientes" />
 
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-ink">👥 Gestión de Clientes</h2>
+            
             <div className="text-sm text-stone">
               Total: {clientes.length} clientes
             </div>
@@ -212,7 +212,7 @@ export default function Clientes() {
                 ? "bg-success/10 text-success border border-success/20" 
                 : "bg-danger/10 text-danger border border-danger/20"
             }`}>
-              <span>{mensaje.tipo === "success" ? "✅" : "❌"}</span>
+              <span>{mensaje.tipo === "success" ? "" : ""}</span>
               {mensaje.texto}
             </div>
           )}
@@ -223,7 +223,7 @@ export default function Clientes() {
               {/* Formulario de registro */}
               <div className="bg-white rounded-xl shadow-sm p-5 border border-stone/20">
                 <h3 className="font-semibold text-ink mb-3 flex items-center gap-2">
-                  <span className="text-xl">📝</span> Registrar Nuevo Cliente
+                  <span className="text-xl"></span> Registrar Nuevo Cliente
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
@@ -246,7 +246,7 @@ export default function Clientes() {
                 >
                   {loadingRegistro ? (
                     <>
-                      <span className="animate-spin">⏳</span> Registrando...
+                      <span className="animate-spin"></span> Registrando...
                     </>
                   ) : (
                     "+ Registrar cliente"
@@ -257,7 +257,7 @@ export default function Clientes() {
               {/* Buscador */}
               <div className="relative">
                 <input
-                  placeholder="🔍 Buscar por código, nombre o teléfono..."
+                  placeholder=" Buscar por código, nombre o teléfono..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="w-full px-4 py-3 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans bg-white"
@@ -289,7 +289,7 @@ export default function Clientes() {
                         <tr>
                           <td colSpan="7" className="text-center py-8 text-stone">
                             <div className="flex items-center justify-center gap-2">
-                              <span className="animate-spin">⏳</span> Cargando clientes...
+                              <span className="animate-spin"></span> Cargando clientes...
                             </div>
                           </td>
                         </tr>
@@ -323,7 +323,7 @@ export default function Clientes() {
                       ) : (
                         <tr>
                           <td colSpan="7" className="text-center py-12 text-stone">
-                            <div className="text-4xl mb-2">📭</div>
+                            <div className="text-4xl mb-2"></div>
                             {search ? "No se encontraron clientes" : "No hay clientes registrados"}
                           </td>
                         </tr>
@@ -338,7 +338,7 @@ export default function Clientes() {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm border border-stone/20 p-5 sticky top-6">
                 <h3 className="font-semibold text-ink mb-4 flex items-center gap-2">
-                  <span className="text-xl">✏️</span> Editar Cliente
+                  <span className="text-xl"></span> Editar Cliente
                 </h3>
 
                 {selected ? (
@@ -413,7 +413,7 @@ export default function Clientes() {
                               : "bg-success hover:bg-success/80"
                           }`}
                         >
-                          {updating ? "⏳" : selected.estado !== false ? "Desactivar" : "Activar"}
+                          {updating ? "" : selected.estado !== false ? "Desactivar" : "Activar"}
                         </button>
 
                         <button
@@ -421,7 +421,7 @@ export default function Clientes() {
                           disabled={updating}
                           className="px-3 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans"
                         >
-                          {updating ? "⏳" : "💾 Guardar"}
+                          {updating ? "" : " Guardar"}
                         </button>
 
                         <button
@@ -429,7 +429,7 @@ export default function Clientes() {
                           disabled={deleting}
                           className="px-3 py-2 bg-danger hover:bg-danger/80 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans"
                         >
-                          {deleting ? "⏳" : "🗑 Eliminar"}
+                          {deleting ? "" : " Eliminar"}
                         </button>
                       </div>
                     </div>
