@@ -101,6 +101,7 @@ export default function SidebarVentas() {
         <ItemMenu to="/dashboard" icono={iconos.dashboard} label="Dashboard" />
         <ItemMenu to="/ventas" icono={iconos.ventas} label="Ventas" />
         <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
+        <ItemMenu to="/clientes" icono={iconos.proveedores} label="Clientes" />
       </nav>
 
       <button

@@ -5,7 +5,7 @@
    Paleta y tipografia definidas para dar coherencia a
    todas las pantallas, sin importar quien las construya.
 --------------------------------------------------------- */
-@theme {
+@theme{
   --color-primary: #1B6E5C;       /* Verde Trebol - botones, encabezados, navegacion */
   --color-primary-dark: #124F42;  /* Verde Bosque - hover/activo */
   --color-accent: #E8A33D;        /* Mango - destacar info importante (cliente frecuente, badges) */
@@ -25,4 +25,371 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   margin: 0;
+}
+/* Scroll personalizado para mejor experiencia */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+
+/* ====== SCROLL PERSONALIZADO ====== */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* ====== SELECTOR DE CLIENTE ====== */
+.cliente-selector {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cliente-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.cliente-selector-body {
+  padding: 0 1rem 1rem 1rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.cliente-buscar-input {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.cliente-buscar-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.cliente-buscar-input::placeholder {
+  color: #9ca3af;
+}
+
+.cliente-lista {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.cliente-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
+}
+
+.cliente-item:last-child {
+  border-bottom: none;
+}
+
+.cliente-item:hover {
+  background-color: #eff6ff;
+}
+
+.cliente-item-seleccionado {
+  background-color: #dbeafe;
+}
+
+.cliente-item-info {
+  flex: 1;
+}
+
+.cliente-item-nombre {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.cliente-item-detalles {
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.cliente-item-badge {
+  font-size: 0.75rem;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.cliente-contador {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.cliente-vacia {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.cliente-vacia-sub {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.cliente-indicador-scroll {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+.cliente-boton-buscar {
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: background-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cliente-boton-buscar:hover {
+  background: #2563eb;
+}
+
+.cliente-boton-quitar {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: background-color 0.15s;
+}
+
+.cliente-boton-quitar:hover {
+  background: #e5e7eb;
+}
+
+/* ====== BOTONES GENERALES ====== */
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.15s;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background: #22c55e;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.15s;
+}
+
+.btn-success:hover {
+  background: #16a34a;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.15s;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.15s;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+}
+
+/* ====== TABLAS ====== */
+.table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.table-clientes {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-clientes thead {
+  background: #1f2937;
+  color: white;
+}
+
+.table-clientes th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.table-clientes td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table-clientes tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* ====== BADGES DE ESTADO ====== */
+.badge-activo {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-inactivo {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ====== ALERTAS ====== */
+.alert-success {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* ====== INPUTS Y FORMULARIOS ====== */
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-field::placeholder {
+  color: #9ca3af;
+}
+
+/* ====== LAYOUT ====== */
+.grid-clientes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .grid-clientes {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1f2937;
 }

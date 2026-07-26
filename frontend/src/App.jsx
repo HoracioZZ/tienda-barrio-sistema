@@ -5,6 +5,8 @@ import VentasPage from "./pages/VentasPage";
 import RutaProtegida from "./components/RutaProtegida";
 import Pedidos from "./pages/Pedidos";
 import Productos from "./pages/Productos";
+import Clientes from "./pages/Clientes";
+
 function App() {
   return (
     <BrowserRouter>
@@ -25,25 +27,23 @@ function App() {
               <Pedidos />
             </RutaProtegida>
           }
-          />
-          <Route
+        />
+        <Route
           path="/productos"
           element={
             <RutaProtegida rolesPermitidos={["Administrador"]}>
               <Productos />
             </RutaProtegida>
           }
-         />
-
-        {/* Ejemplo para cuando los compañeros agreguen sus modulos: */}
-        {/* Solo Administrador puede entrar a reportes */}
-        {/* <Route path="/reportes" element={
-          <RutaProtegida rolesPermitidos={['Administrador']}>
-            <ReportesPage />
-          </RutaProtegida>
-        } /> */}
-
-        {/* Administrador y Vendedor pueden entrar a ventas */}
+        />
+        <Route
+          path="/clientes"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador"]}>
+              <Clientes />
+            </RutaProtegida>
+          }
+        />
         <Route
           path="/ventas"
           element={
@@ -52,9 +52,12 @@ function App() {
             </RutaProtegida>
           }
         />
-        {/* <Route path="/ventas" element={
-          <RutaProtegida rolesPermitidos={['Administrador', 'Vendedor']}>
-            <VentasPage />
+
+        {/* Ejemplo para cuando los compañeros agreguen sus modulos: */}
+        {/* Solo Administrador puede entrar a reportes */}
+        {/* <Route path="/reportes" element={
+          <RutaProtegida rolesPermitidos={['Administrador']}>
+            <ReportesPage />
           </RutaProtegida>
         } /> */}
       </Routes>
