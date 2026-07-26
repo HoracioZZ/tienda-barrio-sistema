@@ -6,8 +6,8 @@ export async function registrarVenta(payload) {
   return data;
 }
 
-export async function listarVentas() {
-  const { data } = await api.get("/ventas");
+export async function listarVentas(filtros = {}) {
+  const { data } = await api.get("/ventas", { params: filtros });
   return data;
 }
 

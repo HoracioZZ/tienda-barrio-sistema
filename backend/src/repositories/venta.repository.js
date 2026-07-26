@@ -32,8 +32,31 @@ async function crearVentaConDetalles(
   });
 }
 
-async function listarVentas() {
-  return prisma.venta.findMany({ include: { detalles: true, cliente: true } });
+// Bolivia esta en UTC-4 todo el año (sin horario de verano).
+// Al filtrar por "dia calendario" boliviano, hay que anclar el rango
+// usando ese offset explicito, no UTC puro, o el ultimo dia del rango
+// se corta ~4 horas antes de tiempo.
+const OFFSET_BOLIVIA = '-04:00';
+
+async function listarVentas({ desde, hasta } = {}) {
+  const where = {};
+  if (desde || hasta) {
+    where.fecha = {};
+    if (desde) {
+      where.fecha.gte = new Date(`${desde}T00:00:00.000${OFFSET_BOLIVIA}`);
+    }
+    if (hasta) {
+      where.fecha.lte = new Date(`${hasta}T23:59:59.999${OFFSET_BOLIVIA}`);
+    }
+  }
+  return prisma.venta.findMany({
+    where,
+    include: {
+      detalles: { include: { producto: true } },
+      cliente: true,
+    },
+    orderBy: { fecha: 'desc' },
+  });
 }
 
 // RF-4: buscar productos por nombre (solo lectura)

@@ -14,7 +14,8 @@ async function registrar(req, res) {
 }
 
 async function listar(req, res) {
-  const ventas = await ventaService.obtenerVentas();
+  const { desde, hasta } = req.query;
+  const ventas = await ventaService.obtenerVentas({ desde, hasta });
   res.json(ventas);
 }
 

@@ -37,8 +37,8 @@ async function registrarVenta({ id_usuario, id_cliente, items }) {
   });
 }
 
-async function obtenerVentas() {
-  return ventaRepository.listarVentas();
+async function obtenerVentas(filtros) {
+  return ventaRepository.listarVentas(filtros);
 }
 
 // RF-4: buscar productos por nombre
