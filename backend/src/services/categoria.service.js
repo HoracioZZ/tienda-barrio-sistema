@@ -5,8 +5,15 @@ async function crearCategoria(data) {
   if (!data.nombre || !data.nombre.trim()) {
     throw new Error('El nombre de la categoria es obligatorio');
   }
-  return categoriaRepository.crear({ nombre: data.nombre.trim() });
-}
+  try {
+    return await categoriaRepository.crear({ nombre: data.nombre.trim() });
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new Error('Ya existe una categoria con ese nombre');
+    }
+    throw error;
+  }
+} 
 
 async function listarCategorias() {
   return categoriaRepository.listar();

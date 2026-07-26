@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RutaProtegida from "./components/RutaProtegida";
 import Pedidos from "./pages/Pedidos";
+import Productos from "./pages/Productos";
 function App() {
   return (
     <BrowserRouter>
@@ -24,7 +25,15 @@ function App() {
               <Pedidos />
             </RutaProtegida>
           }
-        />
+          />
+          <Route
+          path="/productos"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador"]}>
+              <Productos />
+            </RutaProtegida>
+          }
+         />
 
         {/* Ejemplo para cuando los compañeros agreguen sus modulos: */}
         {/* Solo Administrador puede entrar a reportes */}
