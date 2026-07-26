@@ -117,6 +117,7 @@ export default function SidebarCompras() {
         <ItemMenu to="/ventas" icono={iconos.ventas} label="Ventas" />
         <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
         <ItemMenu to="/clientes" icono={iconos.proveedores} label="Clientes" />
+        <ItemMenu to="/reportes" icono={iconos.proveedores} label="Reportes" />
       </nav>
 
       <button
