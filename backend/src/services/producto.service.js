@@ -1,6 +1,6 @@
 const productoRepository = require('../repositories/producto.repository');
 const categoriaRepository = require('../repositories/categoria.repository');
-
+const alertaRepository = require('../repositories/alerta.repository');
 function validarDatosProducto(data) {
   if (!data.nombre || !data.nombre.trim()) {
     throw new Error('El nombre del producto es obligatorio');
@@ -64,13 +64,17 @@ async function actualizarProducto(id, data) {
     if (!categoriaExiste) throw new Error('La categoria indicada no existe');
   }
 
-  return productoRepository.actualizar(id, data);
+  const actualizado = await productoRepository.actualizar(id, data);
+  await alertaRepository.eliminarPorProducto(id); // limpia alertas viejas con datos desactualizados
+  return actualizado;
 }
 
 async function eliminarProducto(id) {
   const existente = await productoRepository.obtenerPorId(id);
   if (!existente) throw new Error('Producto no encontrado');
-  return productoRepository.eliminar(id);
+  const eliminado = await productoRepository.eliminar(id);
+  await alertaRepository.eliminarPorProducto(id); // ya no debe alertar sobre un producto inactivo
+  return eliminado;
 }
 
 // RF-6

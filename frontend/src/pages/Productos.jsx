@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import {
   listarProductos,
   listarProductosPorCategoria,
+  actualizarProducto,
   registrarProducto,
+  eliminarProducto,
 } from "../modules/inventario/productoService";
 import { listarCategorias, registrarCategoria } from "../modules/inventario/categoriaService";
 
@@ -14,9 +16,13 @@ function Productos() {
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState([]);
   const [alertas, setAlertas] = useState([]);
-
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
-
+  const [busquedaProducto, setBusquedaProducto] = useState("");
+  const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
+  const [productoFiltrado, setProductoFiltrado] = useState(null);
+  const [productoEditando, setProductoEditando] = useState(null);
+  const [errorEdicion, setErrorEdicion] = useState("");
   const [nombre, setNombre] = useState("");
   const [precioCompra, setPrecioCompra] = useState("");
   const [precioVenta, setPrecioVenta] = useState("");
@@ -35,7 +41,6 @@ function Productos() {
 
   async function cargarDatos() {
     try {
-      
       const [cats, prods, alts] = await Promise.all([
         listarCategorias(),
         categoriaFiltro ? listarProductosPorCategoria(categoriaFiltro) : listarProductos(),
@@ -87,6 +92,13 @@ function Productos() {
       setError("El stock mínimo no puede ser negativo.");
       return;
     }
+    if (fechaVencimiento) {
+      const hoy = new Date().toISOString().slice(0, 10);
+      if (fechaVencimiento < hoy) {
+        setError("La fecha de vencimiento no puede ser anterior a hoy.");
+        return;
+      }
+    }
 
     setCargando(true);
     try {
@@ -132,6 +144,83 @@ function Productos() {
     }
   }
 
+  async function confirmarEliminarProducto() {
+    if (!productoAEliminar) return;
+    try {
+      await eliminarProducto(productoAEliminar.id_producto);
+      setProductoAEliminar(null);
+      cargarDatos();
+    } catch (err) {
+      setError(err.response?.data?.error || "Error al eliminar el producto.");
+    }
+  }
+
+  function abrirEdicion(p) {
+    setProductoEditando({
+      id_producto: p.id_producto,
+      nombre: p.nombre,
+      precio_compra: p.precio_compra,
+      precio_venta: p.precio_venta,
+      stock: p.stock,
+      stock_minimo: p.stock_minimo,
+      id_categoria: p.id_categoria,
+      fecha_vencimiento: p.fecha_vencimiento ? p.fecha_vencimiento.slice(0, 10) : "",
+    });
+    setErrorEdicion("");
+  }
+
+  async function handleGuardarEdicion(e) {
+    e.preventDefault();
+    setErrorEdicion("");
+
+    if (Number(productoEditando.precio_venta) < Number(productoEditando.precio_compra)) {
+      setErrorEdicion("El precio de venta no puede ser menor al precio de compra.");
+      return;
+    }
+    if (productoEditando.fecha_vencimiento) {
+      const hoy = new Date().toISOString().slice(0, 10);
+      if (productoEditando.fecha_vencimiento < hoy) {
+        setErrorEdicion("La fecha de vencimiento no puede ser anterior a hoy.");
+        return;
+      }
+    }
+
+    try {
+      await actualizarProducto(productoEditando.id_producto, {
+        nombre: productoEditando.nombre.trim(),
+        precio_compra: Number(productoEditando.precio_compra),
+        precio_venta: Number(productoEditando.precio_venta),
+        stock: Number(productoEditando.stock),
+        stock_minimo: Number(productoEditando.stock_minimo),
+        id_categoria: Number(productoEditando.id_categoria),
+        fecha_vencimiento: productoEditando.fecha_vencimiento
+          ? `${productoEditando.fecha_vencimiento}T00:00:00.000Z`
+          : null,
+      });
+      setProductoEditando(null);
+      cargarDatos();
+    } catch (err) {
+      setErrorEdicion(err.response?.data?.error || "Error al actualizar el producto.");
+    }
+  }
+const sugerencias = busquedaProducto
+    ? productos.filter((p) =>
+        p.nombre.toLowerCase().startsWith(busquedaProducto.toLowerCase())
+      )
+    : [];
+
+  const productosMostrados = productoFiltrado ? [productoFiltrado] : productos;
+
+  function seleccionarProductoBusqueda(p) {
+    setProductoFiltrado(p);
+    setBusquedaProducto(p.nombre);
+    setMostrarSugerencias(false);
+  }
+
+  function limpiarBusqueda() {
+    setBusquedaProducto("");
+    setProductoFiltrado(null);
+  }
   return (
     <div className="flex min-h-screen bg-cream">
       <SidebarInventario />
@@ -288,20 +377,68 @@ function Productos() {
 
           {/* Tabla de productos */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-stone/10">
+           <div className="flex items-center justify-between p-4 border-b border-stone/10 gap-3">
               <h2 className="font-display font-semibold text-ink">Catálogo de productos</h2>
-              <select
-                value={categoriaFiltro}
-                onChange={(e) => setCategoriaFiltro(e.target.value)}
-                className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
-              >
-                <option value="">Todas las categorías</option>
-                {categorias.map((c) => (
-                  <option key={c.id_categoria} value={c.id_categoria}>
-                    {c.nombre}
-                  </option>
-                ))}
-              </select>
+
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Buscar producto por nombre..."
+                    value={busquedaProducto}
+                    onChange={(e) => {
+                      setBusquedaProducto(e.target.value);
+                      setProductoFiltrado(null);
+                      setMostrarSugerencias(true);
+                    }}
+                    onFocus={() => setMostrarSugerencias(true)}
+                    className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink w-56 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                  {mostrarSugerencias && busquedaProducto && !productoFiltrado && (
+                    <div className="absolute z-10 mt-1 w-56 bg-white border border-stone/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {sugerencias.length === 0 ? (
+                        <p className="px-3 py-2 text-stone text-sm font-sans">Sin resultados.</p>
+                      ) : (
+                        sugerencias.map((p) => (
+                          <button
+                            type="button"
+                            key={p.id_producto}
+                            onClick={() => seleccionarProductoBusqueda(p)}
+                            className="w-full text-left px-3 py-2 hover:bg-cream text-sm text-ink font-sans"
+                          >
+                            {p.nombre}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {productoFiltrado && (
+                  <button
+                    onClick={limpiarBusqueda}
+                    className="text-sm text-stone hover:text-danger font-sans"
+                  >
+                    Limpiar
+                  </button>
+                )}
+
+                <select
+                  value={categoriaFiltro}
+                  onChange={(e) => {
+                    setCategoriaFiltro(e.target.value);
+                    limpiarBusqueda();
+                  }}
+                  className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                >
+                  <option value="">Todas las categorías</option>
+                  {categorias.map((c) => (
+                    <option key={c.id_categoria} value={c.id_categoria}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <table className="w-full text-left">
@@ -313,10 +450,11 @@ function Productos() {
                   <th className="p-3 text-sm font-sans">Precio venta</th>
                   <th className="p-3 text-sm font-sans">Stock</th>
                   <th className="p-3 text-sm font-sans">Vencimiento</th>
+                  <th className="p-3 text-sm font-sans">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {productos.map((p) => (
+                {productosMostrados.map((p) => (
                   <tr key={p.id_producto} className="border-t border-stone/10">
                     <td className="p-3 text-ink text-sm">{p.nombre}</td>
                     <td className="p-3 text-ink text-sm">{p.categoria?.nombre}</td>
@@ -339,6 +477,20 @@ function Productos() {
                       {p.fecha_vencimiento
                         ? new Date(p.fecha_vencimiento).toLocaleDateString()
                         : "—"}
+                    </td>
+                    <td className="p-3 space-x-3">
+                      <button
+                        onClick={() => abrirEdicion(p)}
+                        className="text-primary hover:text-primary-dark text-sm font-sans"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => setProductoAEliminar(p)}
+                        className="text-danger hover:text-danger/70 text-sm font-sans"
+                      >
+                        Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -380,6 +532,151 @@ function Productos() {
                   className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
                 >
                   Agregar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmar eliminacion de producto */}
+      {productoAEliminar && (
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm text-center">
+            <h3 className="font-display font-semibold text-ink mb-2">Eliminar producto</h3>
+            <p className="text-stone text-sm font-sans mb-6">
+              ¿Seguro que deseas eliminar <strong>{productoAEliminar.nombre}</strong> del catálogo?
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setProductoAEliminar(null)}
+                className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminarProducto}
+                className="px-4 py-2 rounded-lg bg-danger hover:bg-danger/80 text-white font-semibold text-sm"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal editar producto */}
+      {productoEditando && (
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h3 className="font-display font-semibold text-ink mb-4">Editar producto</h3>
+            <form onSubmit={handleGuardarEdicion} className="space-y-3">
+              <div>
+                <label className="block text-sm text-stone mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={productoEditando.nombre}
+                  onChange={(e) =>
+                    setProductoEditando({ ...productoEditando, nombre: e.target.value })
+                  }
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-stone mb-1">Precio compra</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={productoEditando.precio_compra}
+                    onChange={(e) =>
+                      setProductoEditando({ ...productoEditando, precio_compra: e.target.value })
+                    }
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone mb-1">Precio venta</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={productoEditando.precio_venta}
+                    onChange={(e) =>
+                      setProductoEditando({ ...productoEditando, precio_venta: e.target.value })
+                    }
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone mb-1">Stock</label>
+                  <input
+                    type="number"
+                    value={productoEditando.stock}
+                    onChange={(e) =>
+                      setProductoEditando({ ...productoEditando, stock: e.target.value })
+                    }
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone mb-1">Stock mínimo</label>
+                  <input
+                    type="number"
+                    value={productoEditando.stock_minimo}
+                    onChange={(e) =>
+                      setProductoEditando({ ...productoEditando, stock_minimo: e.target.value })
+                    }
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone mb-1">Categoría</label>
+                  <select
+                    value={productoEditando.id_categoria}
+                    onChange={(e) =>
+                      setProductoEditando({ ...productoEditando, id_categoria: e.target.value })
+                    }
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  >
+                    {categorias.map((c) => (
+                      <option key={c.id_categoria} value={c.id_categoria}>
+                        {c.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-stone mb-1">Vencimiento</label>
+                  <input
+                    type="date"
+                    value={productoEditando.fecha_vencimiento}
+                    onChange={(e) =>
+                      setProductoEditando({
+                        ...productoEditando,
+                        fecha_vencimiento: e.target.value,
+                      })
+                    }
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  />
+                </div>
+              </div>
+
+              {errorEdicion && <p className="text-danger text-sm">{errorEdicion}</p>}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setProductoEditando(null)}
+                  className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
+                >
+                  Guardar cambios
                 </button>
               </div>
             </form>

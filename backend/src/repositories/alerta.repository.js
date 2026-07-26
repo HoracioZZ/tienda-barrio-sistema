@@ -31,5 +31,10 @@ async function existeAlertaReciente(id_producto, tipo) {
 async function administradoresActivos() {
   return prisma.usuario.findMany({ where: { rol: 'Administrador', estado: true } });
 }
-
-module.exports = { crear, listar, listarPorUsuario, existeAlertaReciente, administradoresActivos };
+async function eliminarPorProducto(id_producto) {
+  return prisma.alerta.deleteMany({ where: { id_producto: Number(id_producto) } });
+}
+module.exports = {
+  crear, listar, listarPorUsuario, existeAlertaReciente,
+  administradoresActivos, eliminarPorProducto,
+};
