@@ -10,3 +10,8 @@ export async function sugerenciasPedido() {
   const { data } = await api.get("/alertas/sugerencias-pedido");
   return data;
 }
+
+export async function verificarAlertas() {
+  const { data } = await api.post("/alertas/verificar");
+  return data;
+}

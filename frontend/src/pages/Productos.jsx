@@ -5,7 +5,8 @@ import {
   registrarProducto,
 } from "../modules/inventario/productoService";
 import { listarCategorias, registrarCategoria } from "../modules/inventario/categoriaService";
-import { misAlertas } from "../modules/inventario/alertaService";
+
+import { misAlertas, verificarAlertas } from "../modules/inventario/alertaService";
 import SidebarInventario from "../components/SidebarInventario";
 import HeaderModulo from "../components/HeaderModulo";
 
@@ -34,6 +35,7 @@ function Productos() {
 
   async function cargarDatos() {
     try {
+      
       const [cats, prods, alts] = await Promise.all([
         listarCategorias(),
         categoriaFiltro ? listarProductosPorCategoria(categoriaFiltro) : listarProductos(),
@@ -138,10 +140,22 @@ function Productos() {
 
         <div className="p-6">
           {/* Alertas */}
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-display font-semibold text-ink">Alertas</p>
+            <button
+              onClick={async () => {
+                await verificarAlertas();
+                cargarDatos();
+              }}
+              className="text-sm bg-white border border-stone/20 rounded-lg px-3 py-1.5 text-ink hover:bg-cream"
+            >
+              Verificar ahora
+            </button>
+          </div>
           {alertas.length > 0 && (
             <div className="bg-danger/10 border border-danger/20 rounded-lg p-4 mb-6">
               <p className="font-display font-semibold text-danger mb-2">
-                Alertas ({alertas.length})
+                {alertas.length} pendiente(s)
               </p>
               <ul className="space-y-1">
                 {alertas.map((a) => (
