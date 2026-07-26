@@ -5,7 +5,7 @@
    Paleta y tipografia definidas para dar coherencia a
    todas las pantallas, sin importar quien las construya.
 --------------------------------------------------------- */
-@theme {
+@theme{
   --color-primary: #1B6E5C;       /* Verde Trebol - botones, encabezados, navegacion */
   --color-primary-dark: #124F42;  /* Verde Bosque - hover/activo */
   --color-accent: #E8A33D;        /* Mango - destacar info importante (cliente frecuente, badges) */
