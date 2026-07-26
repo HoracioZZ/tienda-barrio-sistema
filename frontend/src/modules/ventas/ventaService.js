@@ -6,7 +6,13 @@ export async function registrarVenta(payload) {
   return data;
 }
 
-export async function listarVentas() {
-  const { data } = await api.get("/ventas");
+export async function listarVentas(filtros = {}) {
+  const { data } = await api.get("/ventas", { params: filtros });
+  return data;
+}
+
+// RF-4: buscar productos por nombre
+export async function buscarProductos(nombre) {
+  const { data } = await api.get("/ventas/productos", { params: { nombre } });
   return data;
 }
