@@ -9,4 +9,7 @@ router.use(verificarToken);
 router.post('/', ventaController.registrar);
 router.get('/', ventaController.listar);
 
+// RF-4: buscar productos por nombre (Administrador o Vendedor pueden buscar)
+router.get('/productos', ventaController.buscarProductos);
+
 module.exports = router;

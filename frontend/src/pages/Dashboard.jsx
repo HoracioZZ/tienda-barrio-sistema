@@ -2,6 +2,7 @@ import { getUsuarioActual, logout } from "../modules/auth/authService";
 import { useNavigate } from "react-router-dom";
 import SidebarCompras from "../components/SidebarCompras";
 import HeaderModulo from "../components/HeaderModulo";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const usuario = getUsuarioActual();
@@ -12,15 +13,37 @@ export default function Dashboard() {
       <div className="flex-1">
         <HeaderModulo titulo={`Bienvenida, ${usuario?.nombre || ""}`} />
 
-        <div className="p-6">
-          <p className="text-stone font-sans">
-            Panel principal — cada módulo (Ventas, Inventario, Clientes, Compras, Reportes)
-            se irá agregando aquí como ruta propia por cada integrante del equipo.
+<div className="p-6">
+          <p className="text-stone font-sans mb-6">
+            Panel principal — accede a los módulos del sistema desde aquí.
           </p>
 
-          <div className="mt-6 inline-block bg-white rounded-lg shadow-sm p-4">
-            <p className="text-stone text-sm font-sans">Ventas de hoy</p>
-            <p className="font-mono text-2xl text-primary font-semibold">Bs 0.00</p>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              to="/ventas"
+              className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow w-48"
+            >
+              <p className="font-display font-semibold text-primary text-lg mb-1">
+                Ventas
+              </p>
+              <p className="text-stone text-sm font-sans">
+                Registrar ventas y ver historial
+              </p>
+            </Link>
+
+            <Link
+              to="/pedidos"
+              className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow w-48"
+            >
+              <p className="font-display font-semibold text-primary text-lg mb-1">
+                Pedidos
+              </p>
+              <p className="text-stone text-sm font-sans">
+                Pedidos a proveedores
+              </p>
+            </Link>
+            {/* Cada integrante agrega aqui su propia tarjeta cuando termine, ej: */}
+            {/* <Link to="/inventario" ...>Inventario</Link> */}
           </div>
         </div>
       </div>
