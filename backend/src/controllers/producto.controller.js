@@ -48,4 +48,17 @@ async function alertasStockBajo(req, res) {
   res.json(await productoService.verificarStockBajo());
 }
 
-module.exports = { registrar, listar, listarPorCategoria, buscar, actualizar, eliminar, alertasStockBajo };
+async function subirImagen(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se recibio ningun archivo' });
+    }
+    const urlImagen = `/uploads/${req.file.filename}`;
+    const producto = await productoService.actualizarImagenProducto(req.params.id, urlImagen);
+    res.json(producto);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { registrar, listar, listarPorCategoria, buscar, actualizar, eliminar, alertasStockBajo, subirImagen };

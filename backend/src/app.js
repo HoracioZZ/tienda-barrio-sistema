@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const path = require('path');
 
 const authRoutes = require('./routes/auth.routes');
 const ventaRoutes = require('./routes/venta.routes');
@@ -16,20 +17,19 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Ruta de salud, util para probar que el backend levanto correctamente
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', mensaje: 'API Tienda de Barrio funcionando' });
 });
 
-// Modulos del sistema (uno por cada Epica/persona del equipo)
-app.use('/api/auth', authRoutes);          // EPIC-3 - Persona 3
-app.use('/api/ventas', ventaRoutes);       // EPIC-1 - Persona 1
-app.use('/api/productos', productoRoutes); // EPIC-2 - Persona 2
-app.use('/api/categorias', categoriaRoutes); // EPIC-2 - Persona 2
-app.use('/api/alertas', alertaRoutes);     // EPIC-2 - Persona 2
-app.use('/api/clientes', clienteRoutes);   // EPIC-4 - Persona 4
-app.use('/api/pedidos', pedidoRoutes);     // EPIC-5 - Persona 5
-app.use('/api/reportes', reporteRoutes);   // EPIC-6 - Persona 6
+app.use('/api/auth', authRoutes);
+app.use('/api/ventas', ventaRoutes);
+app.use('/api/productos', productoRoutes);
+app.use('/api/categorias', categoriaRoutes);
+app.use('/api/alertas', alertaRoutes);
+app.use('/api/clientes', clienteRoutes);
+app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/reportes', reporteRoutes);
 
 module.exports = app;

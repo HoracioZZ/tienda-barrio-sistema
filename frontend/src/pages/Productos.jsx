@@ -6,7 +6,12 @@ import {
   registrarProducto,
   eliminarProducto,
 } from "../modules/inventario/productoService";
-import { listarCategorias, registrarCategoria } from "../modules/inventario/categoriaService";
+import {
+  listarCategorias,
+  registrarCategoria,
+  actualizarCategoria,
+  eliminarCategoria,
+} from "../modules/inventario/categoriaService";
 
 import { misAlertas, verificarAlertas } from "../modules/inventario/alertaService";
 import SidebarInventario from "../components/SidebarInventario";
@@ -38,6 +43,9 @@ function Productos() {
   const [modalCategoriaAbierto, setModalCategoriaAbierto] = useState(false);
   const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState("");
   const [errorCategoria, setErrorCategoria] = useState("");
+  const [categoriaEditando, setCategoriaEditando] = useState(null);
+  const [nombreEditandoCategoria, setNombreEditandoCategoria] = useState("");
+  const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
 
   async function cargarDatos() {
     try {
@@ -144,6 +152,41 @@ function Productos() {
     }
   }
 
+  function abrirEdicionCategoria(c) {
+    setCategoriaEditando(c);
+    setNombreEditandoCategoria(c.nombre);
+    setErrorCategoria("");
+  }
+
+  async function handleGuardarEdicionCategoria(e) {
+    e.preventDefault();
+    setErrorCategoria("");
+    if (!nombreEditandoCategoria.trim()) {
+      setErrorCategoria("El nombre es obligatorio.");
+      return;
+    }
+    try {
+      await actualizarCategoria(categoriaEditando.id_categoria, {
+        nombre: nombreEditandoCategoria.trim(),
+      });
+      setCategoriaEditando(null);
+      cargarDatos();
+    } catch (err) {
+      setErrorCategoria(err.response?.data?.error || "Error al actualizar la categoría.");
+    }
+  }
+
+  async function confirmarEliminarCategoria() {
+    if (!categoriaAEliminar) return;
+    try {
+      await eliminarCategoria(categoriaAEliminar.id_categoria);
+      setCategoriaAEliminar(null);
+      cargarDatos();
+    } catch (err) {
+      setError(err.response?.data?.error || "Error al eliminar la categoría.");
+    }
+  }
+
   async function confirmarEliminarProducto() {
     if (!productoAEliminar) return;
     try {
@@ -203,7 +246,8 @@ function Productos() {
       setErrorEdicion(err.response?.data?.error || "Error al actualizar el producto.");
     }
   }
-const sugerencias = busquedaProducto
+
+  const sugerencias = busquedaProducto
     ? productos.filter((p) =>
         p.nombre.toLowerCase().startsWith(busquedaProducto.toLowerCase())
       )
@@ -221,6 +265,7 @@ const sugerencias = busquedaProducto
     setBusquedaProducto("");
     setProductoFiltrado(null);
   }
+
   return (
     <div className="flex min-h-screen bg-cream">
       <SidebarInventario />
@@ -256,7 +301,7 @@ const sugerencias = busquedaProducto
             </div>
           )}
 
-          {/* Fila superior: formulario + tarjeta */}
+          {/* Fila superior: formulario + categorias */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <form
               onSubmit={handleSubmit}
@@ -361,23 +406,47 @@ const sugerencias = busquedaProducto
               </button>
             </form>
 
-            <div className="bg-primary/5 rounded-lg p-5 flex flex-col items-center justify-center text-center">
-              <p className="font-display font-semibold text-primary mb-1">Organiza tu catálogo</p>
-              <p className="text-stone text-sm font-sans mb-4">
-                Crea categorías para clasificar tus productos.
-              </p>
-              <button
-                onClick={() => setModalCategoriaAbierto(true)}
-                className="bg-white border border-primary text-primary font-semibold rounded-lg px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors"
-              >
-                Registrar categoría
-              </button>
+            {/* Lista de categorias con editar/eliminar */}
+            <div className="bg-white rounded-lg shadow-sm p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="font-display font-semibold text-ink">Categorías</p>
+                <button
+                  onClick={() => setModalCategoriaAbierto(true)}
+                  className="text-sm bg-primary hover:bg-primary-dark text-white rounded-lg px-3 py-1.5"
+                >
+                  + Nueva
+                </button>
+              </div>
+              <ul className="space-y-1 max-h-56 overflow-y-auto">
+                {categorias.map((c) => (
+                  <li
+                    key={c.id_categoria}
+                    className="flex items-center justify-between text-sm py-1.5 border-b border-stone/10 last:border-0"
+                  >
+                    <span className="text-ink">{c.nombre}</span>
+                    <span className="space-x-2">
+                      <button
+                        onClick={() => abrirEdicionCategoria(c)}
+                        className="text-primary hover:text-primary-dark font-sans"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => setCategoriaAEliminar(c)}
+                        className="text-danger hover:text-danger/70 font-sans"
+                      >
+                        Eliminar
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
           {/* Tabla de productos */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-           <div className="flex items-center justify-between p-4 border-b border-stone/10 gap-3">
+            <div className="flex items-center justify-between p-4 border-b border-stone/10 gap-3">
               <h2 className="font-display font-semibold text-ink">Catálogo de productos</h2>
 
               <div className="flex items-center gap-3">
@@ -535,6 +604,71 @@ const sugerencias = busquedaProducto
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal editar categoría */}
+      {categoriaEditando && (
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h3 className="font-display font-semibold text-ink mb-4">Editar categoría</h3>
+            <form onSubmit={handleGuardarEdicionCategoria} className="space-y-3">
+              <div>
+                <label className="block text-sm text-stone mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={nombreEditandoCategoria}
+                  onChange={(e) => setNombreEditandoCategoria(e.target.value)}
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+              {errorCategoria && <p className="text-danger text-sm">{errorCategoria}</p>}
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoriaEditando(null);
+                    setErrorCategoria("");
+                  }}
+                  className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
+                >
+                  Guardar cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmar eliminacion de categoría */}
+      {categoriaAEliminar && (
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm text-center">
+            <h3 className="font-display font-semibold text-ink mb-2">Eliminar categoría</h3>
+            <p className="text-stone text-sm font-sans mb-6">
+              ¿Seguro que deseas eliminar <strong>{categoriaAEliminar.nombre}</strong>?
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setCategoriaAEliminar(null)}
+                className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminarCategoria}
+                className="px-4 py-2 rounded-lg bg-danger hover:bg-danger/80 text-white font-semibold text-sm"
+              >
+                Eliminar
+              </button>
+            </div>
           </div>
         </div>
       )}

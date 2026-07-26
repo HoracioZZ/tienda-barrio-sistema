@@ -81,8 +81,13 @@ async function eliminarProducto(id) {
 async function verificarStockBajo() {
   return productoRepository.stockBajo();
 }
+async function actualizarImagenProducto(id, url_imagen) {
+  const existente = await productoRepository.obtenerPorId(id);
+  if (!existente) throw new Error('Producto no encontrado');
+  return productoRepository.actualizar(id, { url_imagen });
+}
 
 module.exports = {
   registrarProducto, listarProductos, listarProductosPorCategoria,
-  buscarProducto, actualizarProducto, eliminarProducto, verificarStockBajo,
+  buscarProducto, actualizarProducto, eliminarProducto, verificarStockBajo,actualizarImagenProducto,
 };
