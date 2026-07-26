@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../modules/auth/authService";
 
+
 const iconos = {
   dashboard: (
     <svg
@@ -100,6 +101,7 @@ export default function SidebarCompras() {
       <nav className="flex-1">
         <ItemMenu to="/dashboard" icono={iconos.dashboard} label="Dashboard" />
         <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
+         <ItemMenu to="/clientes" icono={iconos.proveedores} label="Clientes" />
       </nav>
 
       <button
