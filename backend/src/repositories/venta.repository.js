@@ -1,13 +1,25 @@
 const prisma = require("../config/prismaClient");
 
+// ✅ Función para calcular descuento según puntos (NO se guarda en BD)
+function calcularDescuentoPorPuntos(puntos) {
+  if (puntos >= 100) return 20;
+  if (puntos >= 50) return 10;
+  if (puntos >= 20) return 5;
+  return 0;
+}
+
 // Ejecuta un callback dentro de una transaccion de Prisma.
-// El service usa esto para orquestar pasos que deben ser atomicos.
 function ejecutarTransaccion(callback) {
   return prisma.$transaction(callback);
 }
 
 async function obtenerProductoPorId(tx, id_producto) {
   return tx.producto.findUnique({ where: { id_producto } });
+}
+
+// ✅ Obtener cliente por ID (para calcular descuento en tiempo real)
+async function obtenerClientePorId(tx, id_cliente) {
+  return tx.cliente.findUnique({ where: { id_cliente } });
 }
 
 async function descontarStock(tx, id_producto, cantidad) {
@@ -17,25 +29,70 @@ async function descontarStock(tx, id_producto, cantidad) {
   });
 }
 
+// ✅ CREAR VENTA CON DESCUENTO CALCULADO EN TIEMPO REAL
 async function crearVentaConDetalles(
   tx,
-  { id_usuario, id_cliente, total, detalles },
+  { id_usuario, id_cliente, detalles, subtotal }
 ) {
-  return tx.venta.create({
+  // 1. Calcular descuento según puntos del cliente (en tiempo real)
+  let descuento = 0;
+  if (id_cliente) {
+    const cliente = await obtenerClientePorId(tx, id_cliente);
+    if (cliente) {
+      descuento = calcularDescuentoPorPuntos(cliente.puntos || 0);
+    }
+  }
+
+  // 2. Calcular total final con descuento
+  const totalFinal = Number((subtotal * (1 - descuento / 100)).toFixed(2));
+
+  // 3. Crear la venta con el total ya calculado
+  const venta = await tx.venta.create({
     data: {
       id_usuario,
       id_cliente: id_cliente || null,
-      total,
-      detalles: { create: detalles },
+      total: totalFinal,
+      detalles: {
+        create: detalles.map((d) => ({
+          id_producto: d.id_producto,
+          cantidad: d.cantidad,
+          precio_unitario: d.precio_unitario,
+          subtotal: d.subtotal,
+        })),
+      },
     },
-    include: { detalles: true },
+    include: { 
+      detalles: { include: { producto: true } },
+      cliente: true 
+    },
+  });
+
+  // 4. Si tiene cliente, sumar punto (SOLO puntos, NO descuento en BD)
+  if (id_cliente) {
+    await sumarPuntoCliente(tx, id_cliente);
+  }
+
+  return venta;
+}
+
+// ✅ Sumar punto al cliente (SOLO puntos, el descuento se calcula en tiempo real)
+async function sumarPuntoCliente(tx, id_cliente) {
+  const cliente = await tx.cliente.findUnique({ where: { id_cliente } });
+  if (!cliente) throw new Error("Cliente no encontrado");
+
+  const nuevosPuntos = (cliente.puntos || 0) + 1;
+
+  return tx.cliente.update({
+    where: { id_cliente },
+    data: {
+      puntos: nuevosPuntos,
+      numero_compras: (cliente.numero_compras || 0) + 1,
+      // ❌ NO guardamos descuento en BD - se calcula en tiempo real
+    },
   });
 }
 
 // Bolivia esta en UTC-4 todo el año (sin horario de verano).
-// Al filtrar por "dia calendario" boliviano, hay que anclar el rango
-// usando ese offset explicito, no UTC puro, o el ultimo dia del rango
-// se corta ~4 horas antes de tiempo.
 const OFFSET_BOLIVIA = '-04:00';
 
 async function listarVentas({ desde, hasta } = {}) {
@@ -73,8 +130,11 @@ async function buscarProductosPorNombre(nombre) {
 module.exports = {
   ejecutarTransaccion,
   obtenerProductoPorId,
+  obtenerClientePorId,
   descontarStock,
   crearVentaConDetalles,
+  sumarPuntoCliente,
   listarVentas,
   buscarProductosPorNombre,
+  calcularDescuentoPorPuntos, // Exportado por si se necesita
 };
