@@ -72,7 +72,7 @@ function ItemMenu({ to, icono, label }) {
   );
 }
 
-export default function SidebarClientes() {
+export default function SidebarInventario() {
   const navigate = useNavigate();
   const usuario = getUsuarioActual();
 
@@ -85,7 +85,7 @@ export default function SidebarClientes() {
     <aside className="w-60 min-h-screen bg-primary p-4 flex flex-col">
       <div className="mb-8 px-2">
         <p className="font-display font-extrabold text-white text-lg">Tiendita</p>
-        <p className="text-cream/70 text-xs font-sans">Gestión de clientes</p>
+        <p className="text-cream/70 text-xs font-sans">Inventario y Catálogo</p>
       </div>
 
       <nav className="flex-1">
@@ -94,10 +94,10 @@ export default function SidebarClientes() {
         {usuario?.rol === "Administrador" && (
           <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
         )}
-        {usuario?.rol === "Administrador" && (
-          <ItemMenu to="/productos" icono={iconos.productos} label="Productos" />
+        <ItemMenu to="/productos" icono={iconos.productos} label="Productos" />
+        {(usuario?.rol === "Administrador" || usuario?.rol === "Vendedor") && (
+          <ItemMenu to="/clientes" icono={iconos.clientes} label="Clientes" />
         )}
-        <ItemMenu to="/clientes" icono={iconos.clientes} label="Clientes" />
         {usuario?.rol === "Administrador" && (
           <ItemMenu to="/reportes" icono={iconos.reportes} label="Reportes" />
         )}

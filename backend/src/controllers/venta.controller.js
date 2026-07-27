@@ -1,4 +1,5 @@
-const ventaService = require('../services/venta.service');
+// backend/src/controllers/venta.controller.js
+const ventaService = require("../services/venta.service");
 
 async function registrar(req, res) {
   try {
@@ -14,19 +15,27 @@ async function registrar(req, res) {
 }
 
 async function listar(req, res) {
-  const { desde, hasta } = req.query;
-  const ventas = await ventaService.obtenerVentas({ desde, hasta });
-  res.json(ventas);
+  try {
+    const { desde, hasta } = req.query;
+    const ventas = await ventaService.obtenerVentas({ desde, hasta });
+    res.json(ventas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
-// RF-4: buscar productos por nombre (query param ?nombre=...)
 async function buscarProductos(req, res) {
   try {
-    const productos = await ventaService.buscarProductos(req.query.nombre);
+    const { q } = req.query;
+    const productos = await ventaService.buscarProductos(q);
     res.json(productos);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 }
 
-module.exports = { registrar, listar, buscarProductos };
+module.exports = {
+  registrar,
+  listar,
+  buscarProductos
+};

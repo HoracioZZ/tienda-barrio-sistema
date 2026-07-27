@@ -1,13 +1,24 @@
+// backend/src/repositories/venta.repository.js
 const prisma = require("../config/prismaClient");
 
-// Ejecuta un callback dentro de una transaccion de Prisma.
-// El service usa esto para orquestar pasos que deben ser atomicos.
+// ✅ Función para calcular descuento según puntos (NO se guarda en BD)
+function calcularDescuentoPorPuntos(puntos) {
+  if (puntos >= 100) return 20;
+  if (puntos >= 50) return 10;
+  if (puntos >= 20) return 5;
+  return 0;
+}
+
 function ejecutarTransaccion(callback) {
   return prisma.$transaction(callback);
 }
 
 async function obtenerProductoPorId(tx, id_producto) {
   return tx.producto.findUnique({ where: { id_producto } });
+}
+
+async function obtenerClientePorId(tx, id_cliente) {
+  return tx.cliente.findUnique({ where: { id_cliente } });
 }
 
 async function descontarStock(tx, id_producto, cantidad) {
@@ -19,23 +30,64 @@ async function descontarStock(tx, id_producto, cantidad) {
 
 async function crearVentaConDetalles(
   tx,
-  { id_usuario, id_cliente, total, detalles },
+  { id_usuario, id_cliente, detalles, subtotal }
 ) {
-  return tx.venta.create({
+  // 1. Calcular descuento según puntos del cliente
+  let descuento = 0;
+  if (id_cliente) {
+    const cliente = await obtenerClientePorId(tx, id_cliente);
+    if (cliente) {
+      descuento = calcularDescuentoPorPuntos(cliente.puntos || 0);
+    }
+  }
+
+  // 2. Calcular total final con descuento
+  const totalFinal = Number((subtotal * (1 - descuento / 100)).toFixed(2));
+
+  // 3. Crear la venta
+  const venta = await tx.venta.create({
     data: {
       id_usuario,
       id_cliente: id_cliente || null,
-      total,
-      detalles: { create: detalles },
+      total: totalFinal,
+      detalles: {
+        create: detalles.map((d) => ({
+          id_producto: d.id_producto,
+          cantidad: d.cantidad,
+          precio_unitario: d.precio_unitario,
+          subtotal: d.subtotal,
+        })),
+      },
     },
-    include: { detalles: true },
+    include: { 
+      detalles: { include: { producto: true } },
+      cliente: true 
+    },
+  });
+
+  // 4. Si tiene cliente, sumar punto
+  if (id_cliente) {
+    await sumarPuntoCliente(tx, id_cliente);
+  }
+
+  return venta;
+}
+
+async function sumarPuntoCliente(tx, id_cliente) {
+  const cliente = await tx.cliente.findUnique({ where: { id_cliente } });
+  if (!cliente) throw new Error("Cliente no encontrado");
+
+  const nuevosPuntos = (cliente.puntos || 0) + 1;
+
+  return tx.cliente.update({
+    where: { id_cliente },
+    data: {
+      puntos: nuevosPuntos,
+      numero_compras: (cliente.numero_compras || 0) + 1,
+    },
   });
 }
 
-// Bolivia esta en UTC-4 todo el año (sin horario de verano).
-// Al filtrar por "dia calendario" boliviano, hay que anclar el rango
-// usando ese offset explicito, no UTC puro, o el ultimo dia del rango
-// se corta ~4 horas antes de tiempo.
 const OFFSET_BOLIVIA = '-04:00';
 
 async function listarVentas({ desde, hasta } = {}) {
@@ -59,7 +111,6 @@ async function listarVentas({ desde, hasta } = {}) {
   });
 }
 
-// RF-4: buscar productos por nombre (solo lectura)
 async function buscarProductosPorNombre(nombre) {
   return prisma.producto.findMany({
     where: {
@@ -69,12 +120,14 @@ async function buscarProductosPorNombre(nombre) {
     orderBy: { nombre: "asc" },
   });
 }
-
 module.exports = {
   ejecutarTransaccion,
   obtenerProductoPorId,
+  obtenerClientePorId,
   descontarStock,
   crearVentaConDetalles,
+  sumarPuntoCliente,
   listarVentas,
   buscarProductosPorNombre,
+  calcularDescuentoPorPuntos,
 };

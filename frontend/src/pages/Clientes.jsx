@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import api from '../services/api';
 import SidebarClientes from "../components/SidebarClientes";
 import HeaderModulo from "../components/HeaderModulo";
+import { getUsuarioActual } from "../modules/auth/authService";
 
 function dedupeById(arr = []) {
   const map = new Map();
@@ -23,6 +24,8 @@ export default function Clientes() {
   const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
 
   const fetchedRef = useRef(false);
+  const usuario = getUsuarioActual();
+  const isAdmin = usuario?.rol === "Administrador";
 
   useEffect(() => {
     if (fetchedRef.current) return;
@@ -43,7 +46,7 @@ export default function Clientes() {
       const res = await api.get("/clientes");
       if (Array.isArray(res.data)) {
         const deduped = dedupeById(res.data);
-        const sorted = deduped.sort((a, b) => 
+        const sorted = deduped.sort((a, b) =>
           (a.nombre || "").localeCompare(b.nombre || "")
         );
         setClientes(sorted);
@@ -117,14 +120,15 @@ export default function Clientes() {
     setUpdating(true);
 
     try {
+      // ✅ NO enviamos descuento, el backend lo calcula solo
       await api.put(`/clientes/${selected.id_cliente}`, {
         nombre: selected.nombre.trim(),
         telefono: selected.telefono.trim(),
         puntos: Number(selected.puntos || 0),
-        descuento: Number(selected.descuento || 0),
         estado: selected.estado !== false,
+        // ❌ No enviamos descuento - se calcula en el backend
       });
-      
+
       await cargarClientes();
       const refreshed = clientes.find(c => c.id_cliente === selected.id_cliente);
       seleccionarCliente(refreshed || null);
@@ -136,7 +140,6 @@ export default function Clientes() {
       setUpdating(false);
     }
   }
-
   async function toggleEstadoCliente() {
     if (!selected) return;
     if (updating) return;
@@ -145,7 +148,7 @@ export default function Clientes() {
     try {
       const nuevoEstado = selected.estado !== false;
       await api.put(`/clientes/${selected.id_cliente}`, { estado: !nuevoEstado });
-      
+
       await cargarClientes();
       setSelected(prev => prev ? { ...prev, estado: !prev.estado } : prev);
       mostrarMensaje("success", ` Cliente ${selected.estado !== false ? 'desactivado' : 'activado'} exitosamente`);
@@ -160,7 +163,7 @@ export default function Clientes() {
   async function eliminarCliente() {
     if (!selected) return;
     if (!confirm(`¿Estás seguro de eliminar a "${selected.nombre}"?`)) return;
-    
+
     if (deleting) return;
     setDeleting(true);
 
@@ -185,8 +188,8 @@ export default function Clientes() {
     if (!busqueda.trim() || !texto) return texto;
     const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const partes = texto.split(regex);
-    return partes.map((parte, i) => 
-      regex.test(parte) 
+    return partes.map((parte, i) =>
+      regex.test(parte)
         ? <span key={i} className="bg-yellow-200 rounded px-0.5">{parte}</span>
         : parte
     );
@@ -200,18 +203,16 @@ export default function Clientes() {
 
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            
             <div className="text-sm text-stone">
               Total: {clientes.length} clientes
             </div>
           </div>
 
           {mensaje.texto && (
-            <div className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${
-              mensaje.tipo === "success" 
-                ? "bg-success/10 text-success border border-success/20" 
-                : "bg-danger/10 text-danger border border-danger/20"
-            }`}>
+            <div className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${mensaje.tipo === "success"
+              ? "bg-success/10 text-success border border-success/20"
+              : "bg-danger/10 text-danger border border-danger/20"
+              }`}>
               <span>{mensaje.tipo === "success" ? "" : ""}</span>
               {mensaje.texto}
             </div>
@@ -220,7 +221,7 @@ export default function Clientes() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Columna Izquierda */}
             <div className="lg:col-span-2 space-y-4">
-              {/* Formulario de registro */}
+              {/* Formulario de registro - Visible para todos */}
               <div className="bg-white rounded-xl shadow-sm p-5 border border-stone/20">
                 <h3 className="font-semibold text-ink mb-3 flex items-center gap-2">
                   <span className="text-xl"></span> Registrar Nuevo Cliente
@@ -302,11 +303,10 @@ export default function Clientes() {
                             <td className="px-4 py-3 text-sm font-semibold text-primary">{c.puntos ?? 0}</td>
                             <td className="px-4 py-3 text-sm text-stone">{c.descuento ?? 0}%</td>
                             <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                c.estado !== false 
-                                  ? "bg-success/20 text-success" 
-                                  : "bg-danger/20 text-danger"
-                              }`}>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.estado !== false
+                                ? "bg-success/20 text-success"
+                                : "bg-danger/20 text-danger"
+                                }`}>
                                 {c.estado !== false ? "Activo" : "Inactivo"}
                               </span>
                             </td>
@@ -315,7 +315,7 @@ export default function Clientes() {
                                 onClick={() => seleccionarCliente(c)}
                                 className="text-primary hover:text-primary-dark text-sm font-medium transition-colors hover:underline"
                               >
-                                Editar
+                                {isAdmin ? "Editar" : "Ver"}
                               </button>
                             </td>
                           </tr>
@@ -334,15 +334,16 @@ export default function Clientes() {
               </div>
             </div>
 
-            {/* Columna Derecha - Panel de edición */}
+            {/* Columna Derecha - Panel de edición/vista */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm border border-stone/20 p-5 sticky top-6">
                 <h3 className="font-semibold text-ink mb-4 flex items-center gap-2">
-                  <span className="text-xl"></span> Editar Cliente
+                  <span className="text-xl"></span> {isAdmin ? "Editar Cliente" : "Detalles del Cliente"}
                 </h3>
 
                 {selected ? (
                   <div className="space-y-3">
+                    {/* Código - Solo lectura */}
                     <div>
                       <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Código</label>
                       <div className="text-sm font-mono text-ink bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
@@ -350,95 +351,124 @@ export default function Clientes() {
                       </div>
                     </div>
 
+                    {/* Nombre */}
                     <div>
                       <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Nombre</label>
-                      <input
-                        value={selected.nombre || ""}
-                        onChange={e => setSelected({ ...selected, nombre: e.target.value })}
-                        className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
-                      />
+                      {isAdmin ? (
+                        <input
+                          value={selected.nombre || ""}
+                          onChange={e => setSelected({ ...selected, nombre: e.target.value })}
+                          className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                        />
+                      ) : (
+                        <div className="text-sm font-medium text-ink bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
+                          {selected.nombre || ""}
+                        </div>
+                      )}
                     </div>
 
+                    {/* Teléfono */}
                     <div>
                       <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Teléfono</label>
-                      <input
-                        value={selected.telefono || ""}
-                        onChange={e => setSelected({ ...selected, telefono: e.target.value })}
-                        className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
-                      />
+                      {isAdmin ? (
+                        <input
+                          value={selected.telefono || ""}
+                          onChange={e => setSelected({ ...selected, telefono: e.target.value })}
+                          className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                        />
+                      ) : (
+                        <div className="text-sm text-ink bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
+                          {selected.telefono || ""}
+                        </div>
+                      )}
                     </div>
 
+                    {/* Puntos - Solo Admin puede editar */}
                     <div>
                       <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Puntos</label>
-                      <input
-                        type="number"
-                        value={selected.puntos ?? 0}
-                        onChange={e => setSelected({ ...selected, puntos: Number(e.target.value) })}
-                        className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
-                        min="0"
-                      />
+                      {isAdmin ? (
+                        <input
+                          type="number"
+                          value={selected.puntos ?? 0}
+                          onChange={e => setSelected({ ...selected, puntos: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                          min="0"
+                        />
+                      ) : (
+                        <div className="text-sm font-semibold text-primary bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
+                          {selected.puntos ?? 0}
+                        </div>
+                      )}
                     </div>
 
+                    {/* ✅ Descuento - SOLO LECTURA (se calcula automáticamente) */}
                     <div>
                       <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Descuento (%)</label>
-                      <input
-                        type="number"
-                        value={selected.descuento ?? 0}
-                        onChange={e => setSelected({ ...selected, descuento: Number(e.target.value) })}
-                        className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
-                        min="0"
-                        max="100"
-                      />
+                      <div className="text-sm font-semibold text-accent bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
+                        {selected.descuento ?? 0}%
+                        <span className="text-xs text-stone font-normal ml-2">
+                          (Calculado automáticamente según puntos)
+                        </span>
+                      </div>
                     </div>
 
+                    {/* Estado */}
                     <div className="pt-3 border-t border-stone/20">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-xs font-medium text-stone uppercase tracking-wider font-sans">Estado</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          selected.estado !== false 
-                            ? "bg-success/20 text-success" 
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${selected.estado !== false
+                            ? "bg-success/20 text-success"
                             : "bg-danger/20 text-danger"
-                        }`}>
+                          }`}>
                           {selected.estado !== false ? "🟢 Activo" : "🔴 Inactivo"}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          onClick={toggleEstadoCliente}
-                          disabled={updating}
-                          className={`px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans ${
-                            selected.estado !== false 
-                              ? "bg-accent hover:bg-accent/80" 
-                              : "bg-success hover:bg-success/80"
-                          }`}
-                        >
-                          {updating ? "" : selected.estado !== false ? "Desactivar" : "Activar"}
-                        </button>
+                      {/* Solo Admin ve los botones de acción */}
+                      {isAdmin && (
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            onClick={toggleEstadoCliente}
+                            disabled={updating}
+                            className={`px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans ${selected.estado !== false
+                                ? "bg-accent hover:bg-accent/80"
+                                : "bg-success hover:bg-success/80"
+                              }`}
+                          >
+                            {updating ? "" : selected.estado !== false ? "Desactivar" : "Activar"}
+                          </button>
 
-                        <button
-                          onClick={actualizarCliente}
-                          disabled={updating}
-                          className="px-3 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans"
-                        >
-                          {updating ? "" : " Guardar"}
-                        </button>
+                          <button
+                            onClick={actualizarCliente}
+                            disabled={updating}
+                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans"
+                          >
+                            {updating ? "" : " Guardar"}
+                          </button>
 
-                        <button
-                          onClick={eliminarCliente}
-                          disabled={deleting}
-                          className="px-3 py-2 bg-danger hover:bg-danger/80 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans"
-                        >
-                          {deleting ? "" : " Eliminar"}
-                        </button>
-                      </div>
+                          <button
+                            onClick={eliminarCliente}
+                            disabled={deleting}
+                            className="px-3 py-2 bg-danger hover:bg-danger/80 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans"
+                          >
+                            {deleting ? "" : " Eliminar"}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Si es Vendedor, mostrar mensaje */}
+                      {!isAdmin && (
+                        <div className="text-center text-sm text-stone bg-cream/50 p-3 rounded-lg">
+                          ℹ️ Solo vista - No puedes editar este cliente
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-12 text-stone">
                     <div className="text-5xl mb-4">👈</div>
                     <p className="font-medium text-ink">Selecciona un cliente</p>
-                    <p className="text-sm mt-1">Haz clic en "Editar" en la tabla</p>
+                    <p className="text-sm mt-1">Haz clic en "{isAdmin ? "Editar" : "Ver"}" en la tabla</p>
                   </div>
                 )}
               </div>

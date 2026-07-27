@@ -1,15 +1,16 @@
-const express = require('express');
+// backend/src/routes/venta.routes.js
+const express = require("express");
 const router = express.Router();
-const ventaController = require('../controllers/venta.controller');
-const { verificarToken } = require('../middlewares/auth.middleware');
+const ventaController = require("../controllers/venta.controller");
+const { verificarToken, permitirRoles } = require("../middlewares/auth.middleware");
 
 router.use(verificarToken);
 
-// RF-1: registrar venta (Administrador o Vendedor)
-router.post('/', ventaController.registrar);
-router.get('/', ventaController.listar);
+// Vendedor y Admin pueden registrar y listar ventas
+router.post("/", permitirRoles("Administrador", "Vendedor"), ventaController.registrar);
+router.get("/", permitirRoles("Administrador", "Vendedor"), ventaController.listar);
 
-// RF-4: buscar productos por nombre (Administrador o Vendedor pueden buscar)
-router.get('/productos', ventaController.buscarProductos);
+// Buscar productos por nombre
+router.get("/productos", permitirRoles("Administrador", "Vendedor"), ventaController.buscarProductos);
 
 module.exports = router;

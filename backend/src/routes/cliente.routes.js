@@ -1,3 +1,4 @@
+// backend/src/routes/cliente.routes.js
 const express = require("express");
 const router = express.Router();
 const clienteController = require("../controllers/cliente.controller");
@@ -5,13 +6,16 @@ const { verificarToken, permitirRoles } = require("../middlewares/auth.middlewar
 
 router.use(verificarToken);
 
-// Vendedor y Administrador pueden listar clientes
+// Vendedor y Admin
 router.get("/", permitirRoles("Administrador", "Vendedor"), clienteController.listar);
+router.get("/buscar", permitirRoles("Administrador", "Vendedor"), clienteController.buscar);
+router.get("/:id", permitirRoles("Administrador", "Vendedor"), clienteController.obtener);
+router.post("/", permitirRoles("Administrador", "Vendedor"), clienteController.registrar);
 
-// Solo Administrador puede registrar clientes
-router.post("/", permitirRoles("Administrador"), clienteController.registrar);
-
-// Solo Administrador puede asignar puntos
-router.patch("/:id/puntos", permitirRoles("Administrador"), clienteController.asignarPuntos);
+// Solo Admin
+router.put("/:id", permitirRoles("Administrador"), clienteController.actualizar);
+router.patch("/:id/estado", permitirRoles("Administrador"), clienteController.cambiarEstado);
+router.patch("/:id/sumar-punto", permitirRoles("Administrador"), clienteController.sumarPuntoPorCompra);
+router.delete("/:id", permitirRoles("Administrador"), clienteController.eliminar);
 
 module.exports = router;
