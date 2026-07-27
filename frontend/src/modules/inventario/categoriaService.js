@@ -1,7 +1,9 @@
 import api from "../../services/api";
 
-export async function listarCategorias() {
-  const { data } = await api.get("/categorias");
+export async function listarCategorias(incluirInactivas = false) {
+  const { data } = await api.get("/categorias", {
+    params: { incluirInactivas },
+  });
   return data;
 }
 
@@ -17,5 +19,10 @@ export async function actualizarCategoria(id_categoria, payload) {
 
 export async function eliminarCategoria(id_categoria) {
   const { data } = await api.delete(`/categorias/${id_categoria}`);
+  return data;
+}
+
+export async function reactivarCategoria(id_categoria) {
+  const { data } = await api.patch(`/categorias/${id_categoria}/reactivar`);
   return data;
 }

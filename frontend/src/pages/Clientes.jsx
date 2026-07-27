@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import api from '../services/api';
+import api from "../services/api";
 import SidebarClientes from "../components/SidebarClientes";
 import HeaderModulo from "../components/HeaderModulo";
 import { getUsuarioActual } from "../modules/auth/authService";
+import Footer from "../components/Footer";
+// Importar iconos de Lucide
+import { Info, MousePointer, CheckCircle, XCircle } from "lucide-react";
 
 function dedupeById(arr = []) {
   const map = new Map();
-  arr.forEach(item => {
+  arr.forEach((item) => {
     if (item && item.id_cliente != null) map.set(String(item.id_cliente), item);
   });
   return Array.from(map.values());
@@ -47,7 +50,7 @@ export default function Clientes() {
       if (Array.isArray(res.data)) {
         const deduped = dedupeById(res.data);
         const sorted = deduped.sort((a, b) =>
-          (a.nombre || "").localeCompare(b.nombre || "")
+          (a.nombre || "").localeCompare(b.nombre || ""),
         );
         setClientes(sorted);
       } else {
@@ -70,10 +73,13 @@ export default function Clientes() {
     }
 
     const existe = clientes.find(
-      c => String(c.telefono).trim() === String(form.telefono).trim()
+      (c) => String(c.telefono).trim() === String(form.telefono).trim(),
     );
     if (existe) {
-      mostrarMensaje("error", `Ya existe un cliente con teléfono ${form.telefono}`);
+      mostrarMensaje(
+        "error",
+        `Ya existe un cliente con teléfono ${form.telefono}`,
+      );
       return;
     }
 
@@ -94,9 +100,11 @@ export default function Clientes() {
   }
 
   const clientesFiltrados = useMemo(() => {
-    const q = String(search || "").trim().toLowerCase();
+    const q = String(search || "")
+      .trim()
+      .toLowerCase();
     if (!q) return clientes;
-    return clientes.filter(c => {
+    return clientes.filter((c) => {
       return (
         String(c.id_cliente).toLowerCase().includes(q) ||
         (c.nombre || "").toLowerCase().includes(q) ||
@@ -120,26 +128,30 @@ export default function Clientes() {
     setUpdating(true);
 
     try {
-      // ✅ NO enviamos descuento, el backend lo calcula solo
       await api.put(`/clientes/${selected.id_cliente}`, {
         nombre: selected.nombre.trim(),
         telefono: selected.telefono.trim(),
         puntos: Number(selected.puntos || 0),
         estado: selected.estado !== false,
-        // ❌ No enviamos descuento - se calcula en el backend
       });
 
       await cargarClientes();
-      const refreshed = clientes.find(c => c.id_cliente === selected.id_cliente);
+      const refreshed = clientes.find(
+        (c) => c.id_cliente === selected.id_cliente,
+      );
       seleccionarCliente(refreshed || null);
       mostrarMensaje("success", " Cliente actualizado exitosamente");
     } catch (err) {
       console.error("Error actualizando cliente:", err);
-      mostrarMensaje("error", err.response?.data?.error || "Error al actualizar el cliente");
+      mostrarMensaje(
+        "error",
+        err.response?.data?.error || "Error al actualizar el cliente",
+      );
     } finally {
       setUpdating(false);
     }
   }
+
   async function toggleEstadoCliente() {
     if (!selected) return;
     if (updating) return;
@@ -147,11 +159,16 @@ export default function Clientes() {
 
     try {
       const nuevoEstado = selected.estado !== false;
-      await api.put(`/clientes/${selected.id_cliente}`, { estado: !nuevoEstado });
+      await api.put(`/clientes/${selected.id_cliente}`, {
+        estado: !nuevoEstado,
+      });
 
       await cargarClientes();
-      setSelected(prev => prev ? { ...prev, estado: !prev.estado } : prev);
-      mostrarMensaje("success", ` Cliente ${selected.estado !== false ? 'desactivado' : 'activado'} exitosamente`);
+      setSelected((prev) => (prev ? { ...prev, estado: !prev.estado } : prev));
+      mostrarMensaje(
+        "success",
+        ` Cliente ${selected.estado !== false ? "desactivado" : "activado"} exitosamente`,
+      );
     } catch (err) {
       console.error("Error cambiando estado:", err);
       mostrarMensaje("error", "Error al cambiar el estado del cliente");
@@ -186,12 +203,19 @@ export default function Clientes() {
 
   function resaltarTexto(texto, busqueda) {
     if (!busqueda.trim() || !texto) return texto;
-    const regex = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const regex = new RegExp(
+      `(${busqueda.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+      "gi",
+    );
     const partes = texto.split(regex);
     return partes.map((parte, i) =>
-      regex.test(parte)
-        ? <span key={i} className="bg-yellow-200 rounded px-0.5">{parte}</span>
-        : parte
+      regex.test(parte) ? (
+        <span key={i} className="bg-yellow-200 rounded px-0.5">
+          {parte}
+        </span>
+      ) : (
+        parte
+      ),
     );
   }
 
@@ -209,10 +233,13 @@ export default function Clientes() {
           </div>
 
           {mensaje.texto && (
-            <div className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${mensaje.tipo === "success"
-              ? "bg-success/10 text-success border border-success/20"
-              : "bg-danger/10 text-danger border border-danger/20"
-              }`}>
+            <div
+              className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${
+                mensaje.tipo === "success"
+                  ? "bg-success/10 text-success border border-success/20"
+                  : "bg-danger/10 text-danger border border-danger/20"
+              }`}
+            >
               <span>{mensaje.tipo === "success" ? "" : ""}</span>
               {mensaje.texto}
             </div>
@@ -230,13 +257,17 @@ export default function Clientes() {
                   <input
                     placeholder="Nombre completo"
                     value={form.nombre}
-                    onChange={e => setForm({ ...form, nombre: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, nombre: e.target.value })
+                    }
                     className="px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                   />
                   <input
                     placeholder="Teléfono"
                     value={form.telefono}
-                    onChange={e => setForm({ ...form, telefono: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, telefono: e.target.value })
+                    }
                     className="px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                   />
                 </div>
@@ -260,7 +291,7 @@ export default function Clientes() {
                 <input
                   placeholder=" Buscar por código, nombre o teléfono..."
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full px-4 py-3 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans bg-white"
                 />
                 {search && (
@@ -276,37 +307,73 @@ export default function Clientes() {
                   <table className="w-full">
                     <thead className="bg-primary text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Código</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Nombre</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Teléfono</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Puntos</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Descuento</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Estado</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">Acción</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Código
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Nombre
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Teléfono
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Puntos
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Descuento
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Estado
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                          Acción
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone/10">
                       {loadingClientes ? (
                         <tr>
-                          <td colSpan="7" className="text-center py-8 text-stone">
+                          <td
+                            colSpan="7"
+                            className="text-center py-8 text-stone"
+                          >
                             <div className="flex items-center justify-center gap-2">
-                              <span className="animate-spin"></span> Cargando clientes...
+                              <span className="animate-spin"></span> Cargando
+                              clientes...
                             </div>
                           </td>
                         </tr>
                       ) : clientesFiltrados.length > 0 ? (
                         clientesFiltrados.map((c, index) => (
-                          <tr key={c.id_cliente} className={`hover:bg-primary/5 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-cream/50'}`}>
-                            <td className="px-4 py-3 text-sm font-mono text-stone">{c.id_cliente}</td>
-                            <td className="px-4 py-3 text-sm font-medium text-ink">{resaltarTexto(c.nombre, search)}</td>
-                            <td className="px-4 py-3 text-sm text-stone">{resaltarTexto(c.telefono, search)}</td>
-                            <td className="px-4 py-3 text-sm font-semibold text-primary">{c.puntos ?? 0}</td>
-                            <td className="px-4 py-3 text-sm text-stone">{c.descuento ?? 0}%</td>
+                          <tr
+                            key={c.id_cliente}
+                            className={`hover:bg-primary/5 transition-colors duration-150 ${
+                              index % 2 === 0 ? "bg-white" : "bg-cream/50"
+                            }`}
+                          >
+                            <td className="px-4 py-3 text-sm font-mono text-stone">
+                              {c.id_cliente}
+                            </td>
+                            <td className="px-4 py-3 text-sm font-medium text-ink">
+                              {resaltarTexto(c.nombre, search)}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-stone">
+                              {resaltarTexto(c.telefono, search)}
+                            </td>
+                            <td className="px-4 py-3 text-sm font-semibold text-primary">
+                              {c.puntos ?? 0}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-stone">
+                              {c.descuento ?? 0}%
+                            </td>
                             <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.estado !== false
-                                ? "bg-success/20 text-success"
-                                : "bg-danger/20 text-danger"
-                                }`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  c.estado !== false
+                                    ? "bg-success/20 text-success"
+                                    : "bg-danger/20 text-danger"
+                                }`}
+                              >
                                 {c.estado !== false ? "Activo" : "Inactivo"}
                               </span>
                             </td>
@@ -322,9 +389,14 @@ export default function Clientes() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="7" className="text-center py-12 text-stone">
+                          <td
+                            colSpan="7"
+                            className="text-center py-12 text-stone"
+                          >
                             <div className="text-4xl mb-2"></div>
-                            {search ? "No se encontraron clientes" : "No hay clientes registrados"}
+                            {search
+                              ? "No se encontraron clientes"
+                              : "No hay clientes registrados"}
                           </td>
                         </tr>
                       )}
@@ -338,14 +410,17 @@ export default function Clientes() {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm border border-stone/20 p-5 sticky top-6">
                 <h3 className="font-semibold text-ink mb-4 flex items-center gap-2">
-                  <span className="text-xl"></span> {isAdmin ? "Editar Cliente" : "Detalles del Cliente"}
+                  <span className="text-xl"></span>{" "}
+                  {isAdmin ? "Editar Cliente" : "Detalles del Cliente"}
                 </h3>
 
                 {selected ? (
                   <div className="space-y-3">
                     {/* Código - Solo lectura */}
                     <div>
-                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Código</label>
+                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">
+                        Código
+                      </label>
                       <div className="text-sm font-mono text-ink bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
                         {selected.id_cliente}
                       </div>
@@ -353,11 +428,15 @@ export default function Clientes() {
 
                     {/* Nombre */}
                     <div>
-                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Nombre</label>
+                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">
+                        Nombre
+                      </label>
                       {isAdmin ? (
                         <input
                           value={selected.nombre || ""}
-                          onChange={e => setSelected({ ...selected, nombre: e.target.value })}
+                          onChange={(e) =>
+                            setSelected({ ...selected, nombre: e.target.value })
+                          }
                           className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                         />
                       ) : (
@@ -369,11 +448,18 @@ export default function Clientes() {
 
                     {/* Teléfono */}
                     <div>
-                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Teléfono</label>
+                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">
+                        Teléfono
+                      </label>
                       {isAdmin ? (
                         <input
                           value={selected.telefono || ""}
-                          onChange={e => setSelected({ ...selected, telefono: e.target.value })}
+                          onChange={(e) =>
+                            setSelected({
+                              ...selected,
+                              telefono: e.target.value,
+                            })
+                          }
                           className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                         />
                       ) : (
@@ -385,12 +471,19 @@ export default function Clientes() {
 
                     {/* Puntos - Solo Admin puede editar */}
                     <div>
-                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Puntos</label>
+                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">
+                        Puntos
+                      </label>
                       {isAdmin ? (
                         <input
                           type="number"
                           value={selected.puntos ?? 0}
-                          onChange={e => setSelected({ ...selected, puntos: Number(e.target.value) })}
+                          onChange={(e) =>
+                            setSelected({
+                              ...selected,
+                              puntos: Number(e.target.value),
+                            })
+                          }
                           className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                           min="0"
                         />
@@ -401,9 +494,11 @@ export default function Clientes() {
                       )}
                     </div>
 
-                    {/* ✅ Descuento - SOLO LECTURA (se calcula automáticamente) */}
+                    {/* Descuento - SOLO LECTURA */}
                     <div>
-                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">Descuento (%)</label>
+                      <label className="block text-xs font-medium text-stone uppercase tracking-wider mb-1 font-sans">
+                        Descuento (%)
+                      </label>
                       <div className="text-sm font-semibold text-accent bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
                         {selected.descuento ?? 0}%
                         <span className="text-xs text-stone font-normal ml-2">
@@ -415,12 +510,27 @@ export default function Clientes() {
                     {/* Estado */}
                     <div className="pt-3 border-t border-stone/20">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium text-stone uppercase tracking-wider font-sans">Estado</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${selected.estado !== false
-                            ? "bg-success/20 text-success"
-                            : "bg-danger/20 text-danger"
-                          }`}>
-                          {selected.estado !== false ? "🟢 Activo" : "🔴 Inactivo"}
+                        <span className="text-xs font-medium text-stone uppercase tracking-wider font-sans">
+                          Estado
+                        </span>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
+                            selected.estado !== false
+                              ? "bg-success/20 text-success"
+                              : "bg-danger/20 text-danger"
+                          }`}
+                        >
+                          {selected.estado !== false ? (
+                            <>
+                              <CheckCircle className="w-3 h-3" />
+                              Activo
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3 h-3" />
+                              Inactivo
+                            </>
+                          )}
                         </span>
                       </div>
 
@@ -430,12 +540,17 @@ export default function Clientes() {
                           <button
                             onClick={toggleEstadoCliente}
                             disabled={updating}
-                            className={`px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans ${selected.estado !== false
+                            className={`px-3 py-2 text-white text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 font-sans ${
+                              selected.estado !== false
                                 ? "bg-accent hover:bg-accent/80"
                                 : "bg-success hover:bg-success/80"
-                              }`}
+                            }`}
                           >
-                            {updating ? "" : selected.estado !== false ? "Desactivar" : "Activar"}
+                            {updating
+                              ? ""
+                              : selected.estado !== false
+                                ? "Desactivar"
+                                : "Activar"}
                           </button>
 
                           <button
@@ -458,23 +573,29 @@ export default function Clientes() {
 
                       {/* Si es Vendedor, mostrar mensaje */}
                       {!isAdmin && (
-                        <div className="text-center text-sm text-stone bg-cream/50 p-3 rounded-lg">
-                          ℹ️ Solo vista - No puedes editar este cliente
+                        <div className="text-center text-sm text-stone bg-cream/50 p-3 rounded-lg flex items-center justify-center gap-2">
+                          <Info className="w-4 h-4" />
+                          Solo vista - No puedes editar este cliente
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
                   <div className="text-center py-12 text-stone">
-                    <div className="text-5xl mb-4">👈</div>
-                    <p className="font-medium text-ink">Selecciona un cliente</p>
-                    <p className="text-sm mt-1">Haz clic en "{isAdmin ? "Editar" : "Ver"}" en la tabla</p>
+                    <MousePointer className="w-12 h-12 mx-auto mb-4 text-stone/50" />
+                    <p className="font-medium text-ink">
+                      Selecciona un cliente
+                    </p>
+                    <p className="text-sm mt-1">
+                      Haz clic en "{isAdmin ? "Editar" : "Ver"}" en la tabla
+                    </p>
                   </div>
                 )}
               </div>
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </div>
   );

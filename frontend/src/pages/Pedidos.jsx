@@ -10,6 +10,14 @@ import {
 } from "../modules/compras/pedidoService";
 import SidebarCompras from "../components/SidebarCompras";
 import HeaderModulo from "../components/HeaderModulo";
+import Footer from "../components/Footer";
+import {
+  CheckCircle,
+  Plus,
+  Calendar,
+  MoreVertical,
+  FileText,
+} from "lucide-react";
 
 function Pedidos() {
   const [proveedores, setProveedores] = useState([]);
@@ -34,22 +42,22 @@ function Pedidos() {
   const [sugerencias, setSugerencias] = useState([]);
   const [menuAbiertoId, setMenuAbiertoId] = useState(null);
 
-async function cargarDatos() {
-  try {
-    const [prov, prod, ped, sug] = await Promise.all([
-      listarProveedores(),
-      listarProductos(),
-      listarPedidos(),
-      sugerenciasDePedido(),
-    ]);
-    setProveedores(prov);
-    setProductos(prod);
-    setPedidos(ped);
-    setSugerencias(sug);
-  } catch (err) {
-    setError("No se pudieron cargar los datos.");
+  async function cargarDatos() {
+    try {
+      const [prov, prod, ped, sug] = await Promise.all([
+        listarProveedores(),
+        listarProductos(),
+        listarPedidos(),
+        sugerenciasDePedido(),
+      ]);
+      setProveedores(prov);
+      setProductos(prod);
+      setPedidos(ped);
+      setSugerencias(sug);
+    } catch (err) {
+      setError("No se pudieron cargar los datos.");
+    }
   }
-}
 
   useEffect(() => {
     cargarDatos();
@@ -158,9 +166,9 @@ async function cargarDatos() {
       <SidebarCompras />
       <div className="flex-1 flex flex-col">
         <HeaderModulo
-         titulo="Pedidos a Proveedores"
-         notificaciones={pedidos.filter((p) => p.estado === "Pendiente")}
-         sugerenciasStock={sugerencias}
+          titulo="Pedidos a Proveedores"
+          notificaciones={pedidos.filter((p) => p.estado === "Pendiente")}
+          sugerenciasStock={sugerencias}
         />
 
         <div className="p-6">
@@ -172,17 +180,7 @@ async function cargarDatos() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9 11l3 3L22 4" />
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                  </svg>
+                  <CheckCircle className="w-4 h-4" />
                 </span>
                 <h2 className="font-display font-semibold text-ink">
                   Nuevo pedido
@@ -284,35 +282,14 @@ async function cargarDatos() {
                 disabled={cargando}
                 className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg px-4 py-2 disabled:opacity-50"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
+                <Plus className="w-4 h-4" />
                 {cargando ? "Guardando..." : "Registrar pedido"}
               </button>
             </form>
 
             <div className="bg-primary/5 rounded-lg p-5 flex flex-col items-center justify-center text-center">
               <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-primary"
-                >
-                  <path d="M9 11l3 3L22 4" />
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                </svg>
+                <CheckCircle className="w-8 h-8 text-primary" />
               </div>
               <p className="font-display font-semibold text-primary mb-1">
                 Gestiona tus pedidos
@@ -325,17 +302,7 @@ async function cargarDatos() {
                 onClick={() => setModalProveedorAbierto(true)}
                 className="flex items-center gap-2 bg-white border border-primary text-primary font-semibold rounded-lg px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
+                <Plus className="w-4 h-4" />
                 Registrar proveedor
               </button>
             </div>
@@ -346,37 +313,14 @@ async function cargarDatos() {
             <div className="flex items-center justify-between p-4 border-b border-stone/10">
               <div className="flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z" />
-                    <rect x="4" y="4" width="16" height="18" rx="2" />
-                  </svg>
+                  <FileText className="w-4 h-4" />
                 </span>
                 <h2 className="font-display font-semibold text-ink">
                   Pedidos registrados
                 </h2>
               </div>
               <div className="relative">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-stone"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone" />
                 <input
                   type="date"
                   value={busquedaFecha}
@@ -448,16 +392,7 @@ async function cargarDatos() {
                         }
                         className="text-stone hover:text-ink p-1"
                       >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <circle cx="12" cy="5" r="1.5" />
-                          <circle cx="12" cy="12" r="1.5" />
-                          <circle cx="12" cy="19" r="1.5" />
-                        </svg>
+                        <MoreVertical className="w-5 h-5" />
                       </button>
                       {menuAbiertoId === p.id_pedido && (
                         <div className="absolute right-0 mt-1 w-40 bg-white border border-stone/20 rounded-lg shadow-lg z-10">
@@ -493,10 +428,7 @@ async function cargarDatos() {
               </tbody>
             </table>
           </div>
-
-          <p className="text-center text-stone text-xs font-sans mt-6">
-            © 2026 PedidosPro. Todos los derechos reservados.
-          </p>
+          <Footer />
         </div>
       </div>
 

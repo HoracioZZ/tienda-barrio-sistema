@@ -11,11 +11,27 @@ import {
   registrarCategoria,
   actualizarCategoria,
   eliminarCategoria,
+  reactivarCategoria,
 } from "../modules/inventario/categoriaService";
 
-import { misAlertas, verificarAlertas } from "../modules/inventario/alertaService";
+import {
+  misAlertas,
+  verificarAlertas,
+} from "../modules/inventario/alertaService";
 import SidebarInventario from "../components/SidebarInventario";
 import HeaderModulo from "../components/HeaderModulo";
+import Footer from "../components/Footer";
+import {
+  TriangleAlert,
+  RefreshCw,
+  Plus,
+  X,
+  Search,
+  Edit,
+  Trash2,
+  RotateCcw,
+  Bell,
+} from "lucide-react";
 
 function Productos() {
   const [categorias, setCategorias] = useState([]);
@@ -46,12 +62,15 @@ function Productos() {
   const [categoriaEditando, setCategoriaEditando] = useState(null);
   const [nombreEditandoCategoria, setNombreEditandoCategoria] = useState("");
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
+  const [mostrarInactivas, setMostrarInactivas] = useState(false);
 
   async function cargarDatos() {
     try {
       const [cats, prods, alts] = await Promise.all([
-        listarCategorias(),
-        categoriaFiltro ? listarProductosPorCategoria(categoriaFiltro) : listarProductos(),
+        listarCategorias(mostrarInactivas), // pasar el flag
+        categoriaFiltro
+          ? listarProductosPorCategoria(categoriaFiltro)
+          : listarProductos(),
         misAlertas(),
       ]);
       setCategorias(cats);
@@ -65,7 +84,7 @@ function Productos() {
   useEffect(() => {
     cargarDatos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoriaFiltro]);
+  }, [categoriaFiltro, mostrarInactivas]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -117,7 +136,9 @@ function Productos() {
         stock: stock ? Number(stock) : 0,
         stock_minimo: stockMinimo ? Number(stockMinimo) : 5,
         id_categoria: Number(idCategoria),
-        fecha_vencimiento: fechaVencimiento ? `${fechaVencimiento}T00:00:00.000Z` : null,
+        fecha_vencimiento: fechaVencimiento
+          ? `${fechaVencimiento}T00:00:00.000Z`
+          : null,
       });
       setExito("Producto registrado correctamente.");
       setNombre("");
@@ -148,7 +169,9 @@ function Productos() {
       setNuevaCategoriaNombre("");
       cargarDatos();
     } catch (err) {
-      setErrorCategoria(err.response?.data?.error || "Error al registrar la categoría.");
+      setErrorCategoria(
+        err.response?.data?.error || "Error al registrar la categoría.",
+      );
     }
   }
 
@@ -172,16 +195,26 @@ function Productos() {
       setCategoriaEditando(null);
       cargarDatos();
     } catch (err) {
-      setErrorCategoria(err.response?.data?.error || "Error al actualizar la categoría.");
+      setErrorCategoria(
+        err.response?.data?.error || "Error al actualizar la categoría.",
+      );
     }
   }
 
   async function confirmarEliminarCategoria() {
     if (!categoriaAEliminar) return;
     try {
-      await eliminarCategoria(categoriaAEliminar.id_categoria);
+      const respuesta = await eliminarCategoria(
+        categoriaAEliminar.id_categoria,
+      );
       setCategoriaAEliminar(null);
-      cargarDatos();
+      await cargarDatos();
+      // Mostrar mensaje de éxito con la información que venga del backend
+      if (respuesta?.mensaje) {
+        setExito(respuesta.mensaje);
+      } else {
+        setExito("Categoría eliminada correctamente.");
+      }
     } catch (err) {
       setError(err.response?.data?.error || "Error al eliminar la categoría.");
     }
@@ -207,7 +240,9 @@ function Productos() {
       stock: p.stock,
       stock_minimo: p.stock_minimo,
       id_categoria: p.id_categoria,
-      fecha_vencimiento: p.fecha_vencimiento ? p.fecha_vencimiento.slice(0, 10) : "",
+      fecha_vencimiento: p.fecha_vencimiento
+        ? p.fecha_vencimiento.slice(0, 10)
+        : "",
     });
     setErrorEdicion("");
   }
@@ -216,8 +251,13 @@ function Productos() {
     e.preventDefault();
     setErrorEdicion("");
 
-    if (Number(productoEditando.precio_venta) < Number(productoEditando.precio_compra)) {
-      setErrorEdicion("El precio de venta no puede ser menor al precio de compra.");
+    if (
+      Number(productoEditando.precio_venta) <
+      Number(productoEditando.precio_compra)
+    ) {
+      setErrorEdicion(
+        "El precio de venta no puede ser menor al precio de compra.",
+      );
       return;
     }
     if (productoEditando.fecha_vencimiento) {
@@ -243,13 +283,15 @@ function Productos() {
       setProductoEditando(null);
       cargarDatos();
     } catch (err) {
-      setErrorEdicion(err.response?.data?.error || "Error al actualizar el producto.");
+      setErrorEdicion(
+        err.response?.data?.error || "Error al actualizar el producto.",
+      );
     }
   }
 
   const sugerencias = busquedaProducto
     ? productos.filter((p) =>
-        p.nombre.toLowerCase().startsWith(busquedaProducto.toLowerCase())
+        p.nombre.toLowerCase().startsWith(busquedaProducto.toLowerCase()),
       )
     : [];
 
@@ -281,8 +323,9 @@ function Productos() {
                 await verificarAlertas();
                 cargarDatos();
               }}
-              className="text-sm bg-white border border-stone/20 rounded-lg px-3 py-1.5 text-ink hover:bg-cream"
+              className="flex items-center gap-1.5 text-sm bg-white border border-stone/20 rounded-lg px-3 py-1.5 text-ink hover:bg-cream transition-colors"
             >
+              <RefreshCw className="w-4 h-4" />
               Verificar ahora
             </button>
           </div>
@@ -307,11 +350,15 @@ function Productos() {
               onSubmit={handleSubmit}
               className="lg:col-span-2 bg-white rounded-lg shadow-sm p-5 space-y-3"
             >
-              <h2 className="font-display font-semibold text-ink mb-2">Nuevo producto</h2>
+              <h2 className="font-display font-semibold text-ink mb-2">
+                Nuevo producto
+              </h2>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-sm text-stone mb-1">Nombre</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Nombre
+                  </label>
                   <input
                     type="text"
                     placeholder="Nombre del producto"
@@ -322,7 +369,9 @@ function Productos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-stone mb-1">Precio compra</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Precio compra
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -334,7 +383,9 @@ function Productos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-stone mb-1">Precio venta</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Precio venta
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -346,7 +397,9 @@ function Productos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-stone mb-1">Stock inicial</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Stock inicial
+                  </label>
                   <input
                     type="number"
                     placeholder="0"
@@ -357,7 +410,9 @@ function Productos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-stone mb-1">Stock mínimo</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Stock mínimo
+                  </label>
                   <input
                     type="number"
                     placeholder="5"
@@ -368,7 +423,9 @@ function Productos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-stone mb-1">Categoría</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Categoría
+                  </label>
                   <select
                     value={idCategoria}
                     onChange={(e) => setIdCategoria(e.target.value)}
@@ -384,7 +441,9 @@ function Productos() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-stone mb-1">Vencimiento (opcional)</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Vencimiento (opcional)
+                  </label>
                   <input
                     type="date"
                     value={fechaVencimiento}
@@ -409,37 +468,93 @@ function Productos() {
             {/* Lista de categorias con editar/eliminar */}
             <div className="bg-white rounded-lg shadow-sm p-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="font-display font-semibold text-ink">Categorías</p>
-                <button
-                  onClick={() => setModalCategoriaAbierto(true)}
-                  className="text-sm bg-primary hover:bg-primary-dark text-white rounded-lg px-3 py-1.5"
-                >
-                  + Nueva
-                </button>
+                <p className="font-display font-semibold text-ink">
+                  Categorías
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setMostrarInactivas(!mostrarInactivas)}
+                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded border ${
+                      mostrarInactivas
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-stone border-stone/30"
+                    }`}
+                  >
+                    {mostrarInactivas ? (
+                      <>Ocultar inactivas</>
+                    ) : (
+                      <>Ver inactivas</>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setModalCategoriaAbierto(true)}
+                    className="flex items-center gap-1 text-sm bg-primary hover:bg-primary-dark text-white rounded-lg px-3 py-1.5 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Nueva
+                  </button>
+                </div>
               </div>
               <ul className="space-y-1 max-h-56 overflow-y-auto">
-                {categorias.map((c) => (
-                  <li
-                    key={c.id_categoria}
-                    className="flex items-center justify-between text-sm py-1.5 border-b border-stone/10 last:border-0"
-                  >
-                    <span className="text-ink">{c.nombre}</span>
-                    <span className="space-x-2">
-                      <button
-                        onClick={() => abrirEdicionCategoria(c)}
-                        className="text-primary hover:text-primary-dark font-sans"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => setCategoriaAEliminar(c)}
-                        className="text-danger hover:text-danger/70 font-sans"
-                      >
-                        Eliminar
-                      </button>
-                    </span>
-                  </li>
-                ))}
+                {categorias.map((c) => {
+                  // Contar cuántos productos tienen esta categoría
+                  const productosEnCategoria = productos.filter(
+                    (p) => p.id_categoria === c.id_categoria,
+                  ).length;
+                  return (
+                    <li
+                      key={c.id_categoria}
+                      className="flex items-center justify-between text-sm py-1.5 border-b border-stone/10 last:border-0"
+                    >
+                      <span className="text-ink flex items-center gap-2">
+                        {c.nombre}
+                        {!c.estado && (
+                          <span className="text-xs bg-danger/20 text-danger px-2 py-0.5 rounded-full">
+                            Inactiva
+                          </span>
+                        )}
+                      </span>
+                      <span className="space-x-2">
+                        <button
+                          onClick={() => abrirEdicionCategoria(c)}
+                          className="text-primary hover:text-primary-dark font-sans"
+                        >
+                          Editar
+                        </button>
+                        {c.estado ? (
+                          <button
+                            onClick={() =>
+                              setCategoriaAEliminar({
+                                ...c,
+                                productosCount: productosEnCategoria,
+                              })
+                            }
+                            className="text-danger hover:text-danger/70 font-sans"
+                          >
+                            Eliminar
+                          </button>
+                        ) : (
+                          <button
+                            onClick={async () => {
+                              try {
+                                await reactivarCategoria(c.id_categoria);
+                                cargarDatos();
+                              } catch (err) {
+                                setError(
+                                  err.response?.data?.error ||
+                                    "Error al reactivar",
+                                );
+                              }
+                            }}
+                            className="text-success hover:text-success/70 font-sans"
+                          >
+                            Reactivar
+                          </button>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
@@ -447,7 +562,9 @@ function Productos() {
           {/* Tabla de productos */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-stone/10 gap-3">
-              <h2 className="font-display font-semibold text-ink">Catálogo de productos</h2>
+              <h2 className="font-display font-semibold text-ink">
+                Catálogo de productos
+              </h2>
 
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -463,31 +580,36 @@ function Productos() {
                     onFocus={() => setMostrarSugerencias(true)}
                     className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink w-56 focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
-                  {mostrarSugerencias && busquedaProducto && !productoFiltrado && (
-                    <div className="absolute z-10 mt-1 w-56 bg-white border border-stone/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {sugerencias.length === 0 ? (
-                        <p className="px-3 py-2 text-stone text-sm font-sans">Sin resultados.</p>
-                      ) : (
-                        sugerencias.map((p) => (
-                          <button
-                            type="button"
-                            key={p.id_producto}
-                            onClick={() => seleccionarProductoBusqueda(p)}
-                            className="w-full text-left px-3 py-2 hover:bg-cream text-sm text-ink font-sans"
-                          >
-                            {p.nombre}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  )}
+                  {mostrarSugerencias &&
+                    busquedaProducto &&
+                    !productoFiltrado && (
+                      <div className="absolute z-10 mt-1 w-56 bg-white border border-stone/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {sugerencias.length === 0 ? (
+                          <p className="px-3 py-2 text-stone text-sm font-sans">
+                            Sin resultados.
+                          </p>
+                        ) : (
+                          sugerencias.map((p) => (
+                            <button
+                              type="button"
+                              key={p.id_producto}
+                              onClick={() => seleccionarProductoBusqueda(p)}
+                              className="w-full text-left px-3 py-2 hover:bg-cream text-sm text-ink font-sans"
+                            >
+                              {p.nombre}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
                 </div>
 
                 {productoFiltrado && (
                   <button
                     onClick={limpiarBusqueda}
-                    className="text-sm text-stone hover:text-danger font-sans"
+                    className="flex items-center gap-1 text-sm text-stone hover:text-danger font-sans transition-colors"
                   >
+                    <X className="w-4 h-4" />
                     Limpiar
                   </button>
                 )}
@@ -526,8 +648,12 @@ function Productos() {
                 {productosMostrados.map((p) => (
                   <tr key={p.id_producto} className="border-t border-stone/10">
                     <td className="p-3 text-ink text-sm">{p.nombre}</td>
-                    <td className="p-3 text-ink text-sm">{p.categoria?.nombre}</td>
-                    <td className="p-3 font-mono text-ink text-sm">Bs {p.precio_compra}</td>
+                    <td className="p-3 text-ink text-sm">
+                      {p.categoria?.nombre}
+                    </td>
+                    <td className="p-3 font-mono text-ink text-sm">
+                      Bs {p.precio_compra}
+                    </td>
                     <td className="p-3 font-mono text-primary text-sm font-semibold">
                       Bs {p.precio_venta}
                     </td>
@@ -567,13 +693,16 @@ function Productos() {
             </table>
           </div>
         </div>
+        <Footer />
       </div>
 
       {/* Modal registrar categoría */}
       {modalCategoriaAbierto && (
         <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h3 className="font-display font-semibold text-ink mb-4">Registrar categoría</h3>
+            <h3 className="font-display font-semibold text-ink mb-4">
+              Registrar categoría
+            </h3>
             <form onSubmit={handleCrearCategoria} className="space-y-3">
               <div>
                 <label className="block text-sm text-stone mb-1">Nombre</label>
@@ -584,7 +713,9 @@ function Productos() {
                   className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
-              {errorCategoria && <p className="text-danger text-sm">{errorCategoria}</p>}
+              {errorCategoria && (
+                <p className="text-danger text-sm">{errorCategoria}</p>
+              )}
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -612,8 +743,13 @@ function Productos() {
       {categoriaEditando && (
         <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h3 className="font-display font-semibold text-ink mb-4">Editar categoría</h3>
-            <form onSubmit={handleGuardarEdicionCategoria} className="space-y-3">
+            <h3 className="font-display font-semibold text-ink mb-4">
+              Editar categoría
+            </h3>
+            <form
+              onSubmit={handleGuardarEdicionCategoria}
+              className="space-y-3"
+            >
               <div>
                 <label className="block text-sm text-stone mb-1">Nombre</label>
                 <input
@@ -623,7 +759,9 @@ function Productos() {
                   className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
-              {errorCategoria && <p className="text-danger text-sm">{errorCategoria}</p>}
+              {errorCategoria && (
+                <p className="text-danger text-sm">{errorCategoria}</p>
+              )}
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -651,10 +789,26 @@ function Productos() {
       {categoriaAEliminar && (
         <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm text-center">
-            <h3 className="font-display font-semibold text-ink mb-2">Eliminar categoría</h3>
-            <p className="text-stone text-sm font-sans mb-6">
-              ¿Seguro que deseas eliminar <strong>{categoriaAEliminar.nombre}</strong>?
+            <h3 className="font-display font-semibold text-ink mb-2">
+              Eliminar categoría
+            </h3>
+            <p className="text-stone text-sm font-sans mb-4">
+              ¿Seguro que deseas eliminar{" "}
+              <strong>{categoriaAEliminar.nombre}</strong>?
             </p>
+            {categoriaAEliminar.productosCount > 0 && (
+              <div className="bg-danger/10 border border-danger/20 rounded-lg p-3 mb-4 text-sm text-danger font-sans flex items-start gap-2">
+                <TriangleAlert className="w-5 h-5 shrink-0 mt-0.5" />
+                <div>
+                  Esta categoría tiene{" "}
+                  <strong>{categoriaAEliminar.productosCount}</strong>{" "}
+                  producto(s) asignados.
+                  <br />
+                  Al eliminarla, serán reasignados a la categoría{" "}
+                  <strong>"General"</strong>.
+                </div>
+              </div>
+            )}
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => setCategoriaAEliminar(null)}
@@ -677,9 +831,12 @@ function Productos() {
       {productoAEliminar && (
         <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm text-center">
-            <h3 className="font-display font-semibold text-ink mb-2">Eliminar producto</h3>
+            <h3 className="font-display font-semibold text-ink mb-2">
+              Eliminar producto
+            </h3>
             <p className="text-stone text-sm font-sans mb-6">
-              ¿Seguro que deseas eliminar <strong>{productoAEliminar.nombre}</strong> del catálogo?
+              ¿Seguro que deseas eliminar{" "}
+              <strong>{productoAEliminar.nombre}</strong> del catálogo?
             </p>
             <div className="flex justify-center gap-3">
               <button
@@ -703,7 +860,9 @@ function Productos() {
       {productoEditando && (
         <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h3 className="font-display font-semibold text-ink mb-4">Editar producto</h3>
+            <h3 className="font-display font-semibold text-ink mb-4">
+              Editar producto
+            </h3>
             <form onSubmit={handleGuardarEdicion} className="space-y-3">
               <div>
                 <label className="block text-sm text-stone mb-1">Nombre</label>
@@ -711,7 +870,10 @@ function Productos() {
                   type="text"
                   value={productoEditando.nombre}
                   onChange={(e) =>
-                    setProductoEditando({ ...productoEditando, nombre: e.target.value })
+                    setProductoEditando({
+                      ...productoEditando,
+                      nombre: e.target.value,
+                    })
                   }
                   className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
@@ -719,25 +881,35 @@ function Productos() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm text-stone mb-1">Precio compra</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Precio compra
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     value={productoEditando.precio_compra}
                     onChange={(e) =>
-                      setProductoEditando({ ...productoEditando, precio_compra: e.target.value })
+                      setProductoEditando({
+                        ...productoEditando,
+                        precio_compra: e.target.value,
+                      })
                     }
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-stone mb-1">Precio venta</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Precio venta
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     value={productoEditando.precio_venta}
                     onChange={(e) =>
-                      setProductoEditando({ ...productoEditando, precio_venta: e.target.value })
+                      setProductoEditando({
+                        ...productoEditando,
+                        precio_venta: e.target.value,
+                      })
                     }
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
@@ -748,28 +920,41 @@ function Productos() {
                     type="number"
                     value={productoEditando.stock}
                     onChange={(e) =>
-                      setProductoEditando({ ...productoEditando, stock: e.target.value })
+                      setProductoEditando({
+                        ...productoEditando,
+                        stock: e.target.value,
+                      })
                     }
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-stone mb-1">Stock mínimo</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Stock mínimo
+                  </label>
                   <input
                     type="number"
                     value={productoEditando.stock_minimo}
                     onChange={(e) =>
-                      setProductoEditando({ ...productoEditando, stock_minimo: e.target.value })
+                      setProductoEditando({
+                        ...productoEditando,
+                        stock_minimo: e.target.value,
+                      })
                     }
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-stone mb-1">Categoría</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Categoría
+                  </label>
                   <select
                     value={productoEditando.id_categoria}
                     onChange={(e) =>
-                      setProductoEditando({ ...productoEditando, id_categoria: e.target.value })
+                      setProductoEditando({
+                        ...productoEditando,
+                        id_categoria: e.target.value,
+                      })
                     }
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   >
@@ -781,7 +966,9 @@ function Productos() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-stone mb-1">Vencimiento</label>
+                  <label className="block text-sm text-stone mb-1">
+                    Vencimiento
+                  </label>
                   <input
                     type="date"
                     value={productoEditando.fecha_vencimiento}
@@ -796,7 +983,9 @@ function Productos() {
                 </div>
               </div>
 
-              {errorEdicion && <p className="text-danger text-sm">{errorEdicion}</p>}
+              {errorEdicion && (
+                <p className="text-danger text-sm">{errorEdicion}</p>
+              )}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button

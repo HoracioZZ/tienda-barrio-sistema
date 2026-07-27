@@ -1,4 +1,4 @@
-const categoriaService = require('../services/categoria.service');
+const categoriaService = require("../services/categoria.service");
 
 async function registrar(req, res) {
   try {
@@ -10,12 +10,17 @@ async function registrar(req, res) {
 }
 
 async function listar(req, res) {
-  res.json(await categoriaService.listarCategorias());
+  // Parámetro para incluir inactivas: ?incluirInactivas=true
+  const incluirInactivas = req.query.incluirInactivas === "true";
+  res.json(await categoriaService.listarCategorias(incluirInactivas));
 }
 
 async function actualizar(req, res) {
   try {
-    const categoria = await categoriaService.actualizarCategoria(req.params.id, req.body);
+    const categoria = await categoriaService.actualizarCategoria(
+      req.params.id,
+      req.body,
+    );
     res.json(categoria);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -24,11 +29,27 @@ async function actualizar(req, res) {
 
 async function eliminar(req, res) {
   try {
-    await categoriaService.eliminarCategoria(req.params.id);
-    res.status(204).send();
+    const resultado = await categoriaService.eliminarCategoria(req.params.id);
+    // Si se reasignaron productos, devolver mensaje con cantidad
+    if (resultado.productosReasignados > 0) {
+      res.json({
+        mensaje: `Categoría eliminada. ${resultado.productosReasignados} producto(s) reasignado(s) a la categoría predeterminada.`,
+      });
+    } else {
+      res.json({ mensaje: "Categoría eliminada correctamente." });
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 }
 
-module.exports = { registrar, listar, actualizar, eliminar };
+async function reactivar(req, res) {
+  try {
+    const categoria = await categoriaService.reactivarCategoria(req.params.id);
+    res.json(categoria);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { registrar, listar, actualizar, eliminar, reactivar };

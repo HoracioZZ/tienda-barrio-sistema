@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { login } from "../modules/auth/authService";
 import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
+import { Store } from "lucide-react";
 
 export default function Login() {
   const [loginInput, setLoginInput] = useState("");
@@ -20,8 +22,12 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-cream">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-80 space-y-4">
-        <h1 className="font-display font-extrabold text-2xl text-center text-primary">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md w-80 space-y-4"
+      >
+        <h1 className="font-display font-extrabold text-2xl text-center text-primary flex items-center justify-center gap-2">
+          <Store className="w-8 h-8" />
           Tienda de Barrio
         </h1>
         <input
