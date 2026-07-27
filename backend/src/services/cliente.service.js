@@ -1,4 +1,4 @@
-// src/services/cliente.service.js
+// backend/src/services/cliente.service.js
 const clienteRepository = require("../repositories/cliente.repository");
 
 // ✅ Función de descuento (se calcula en el servicio)
@@ -14,7 +14,7 @@ async function listarClientes() {
   const clientes = await clienteRepository.listar();
   return clientes.map(c => ({
     ...c,
-    descuento: calcularDescuentoPorPuntos(c.puntos || 0)  // ← Se calcula aquí
+    descuento: calcularDescuentoPorPuntos(c.puntos || 0)
   }));
 }
 
@@ -77,7 +77,7 @@ async function actualizarCliente(id, data) {
   };
 }
 
-// ✅ Sumar punto por compra
+// Sumar punto por compra
 async function sumarPuntoPorCompra(id) {
   const cliente = await clienteRepository.obtenerPorId(id);
   if (!cliente) throw new Error("Cliente no encontrado");

@@ -1,3 +1,4 @@
+// backend/src/services/venta.service.js
 const ventaRepository = require("../repositories/venta.repository");
 
 async function registrarVenta({ id_usuario, id_cliente, items }) {
@@ -5,7 +6,6 @@ async function registrarVenta({ id_usuario, id_cliente, items }) {
     let subtotal = 0;
     const detalles = [];
 
-    // 1. Calcular subtotal y preparar detalles
     for (const item of items) {
       const producto = await ventaRepository.obtenerProductoPorId(tx, item.id_producto);
       if (!producto) throw new Error(`Producto ${item.id_producto} no existe`);
@@ -26,7 +26,6 @@ async function registrarVenta({ id_usuario, id_cliente, items }) {
       await ventaRepository.descontarStock(tx, item.id_producto, item.cantidad);
     }
 
-    // 2. Crear venta (el repository calcula el descuento automáticamente)
     return ventaRepository.crearVentaConDetalles(tx, {
       id_usuario,
       id_cliente,
@@ -47,4 +46,8 @@ async function buscarProductos(nombre) {
   return ventaRepository.buscarProductosPorNombre(nombre.trim());
 }
 
-module.exports = { registrarVenta, obtenerVentas, buscarProductos };
+module.exports = { 
+  registrarVenta, 
+  obtenerVentas, 
+  buscarProductos 
+};

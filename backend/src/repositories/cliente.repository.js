@@ -1,15 +1,15 @@
-// src/repositories/cliente.repository.js
+// backend/src/repositories/cliente.repository.js
 const prisma = require("../config/prismaClient");
 
 class ClienteRepository {
   // Crear cliente
   async crear(data) {
-    const { nombre, telefono } = data;
+    const { nombre, telefono, puntos = 0 } = data;
     return await prisma.cliente.create({
       data: {
         nombre,
         telefono,
-        puntos: 0,
+        puntos,
         numero_compras: 0,
         estado: true
       }
@@ -38,7 +38,7 @@ class ClienteRepository {
     });
   }
 
-  // Actualizar cliente (sin descuento)
+  // Actualizar cliente
   async actualizar(id, data) {
     const { nombre, telefono, puntos, estado } = data;
     return await prisma.cliente.update({
@@ -102,14 +102,6 @@ class ClienteRepository {
       },
       orderBy: { nombre: 'asc' }
     });
-  }
-
-  // ✅ Función para calcular descuento (NO se guarda en DB)
-  calcularDescuentoPorPuntos(puntos) {
-    if (puntos >= 100) return 20;
-    if (puntos >= 50) return 10;
-    if (puntos >= 20) return 5;
-    return 0;
   }
 }
 

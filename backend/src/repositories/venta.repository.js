@@ -1,3 +1,4 @@
+// backend/src/repositories/venta.repository.js
 const prisma = require("../config/prismaClient");
 
 // ✅ Función para calcular descuento según puntos (NO se guarda en BD)
@@ -8,7 +9,6 @@ function calcularDescuentoPorPuntos(puntos) {
   return 0;
 }
 
-// Ejecuta un callback dentro de una transaccion de Prisma.
 function ejecutarTransaccion(callback) {
   return prisma.$transaction(callback);
 }
@@ -17,7 +17,6 @@ async function obtenerProductoPorId(tx, id_producto) {
   return tx.producto.findUnique({ where: { id_producto } });
 }
 
-// ✅ Obtener cliente por ID (para calcular descuento en tiempo real)
 async function obtenerClientePorId(tx, id_cliente) {
   return tx.cliente.findUnique({ where: { id_cliente } });
 }
@@ -29,12 +28,11 @@ async function descontarStock(tx, id_producto, cantidad) {
   });
 }
 
-// ✅ CREAR VENTA CON DESCUENTO CALCULADO EN TIEMPO REAL
 async function crearVentaConDetalles(
   tx,
   { id_usuario, id_cliente, detalles, subtotal }
 ) {
-  // 1. Calcular descuento según puntos del cliente (en tiempo real)
+  // 1. Calcular descuento según puntos del cliente
   let descuento = 0;
   if (id_cliente) {
     const cliente = await obtenerClientePorId(tx, id_cliente);
@@ -46,7 +44,7 @@ async function crearVentaConDetalles(
   // 2. Calcular total final con descuento
   const totalFinal = Number((subtotal * (1 - descuento / 100)).toFixed(2));
 
-  // 3. Crear la venta con el total ya calculado
+  // 3. Crear la venta
   const venta = await tx.venta.create({
     data: {
       id_usuario,
@@ -67,7 +65,7 @@ async function crearVentaConDetalles(
     },
   });
 
-  // 4. Si tiene cliente, sumar punto (SOLO puntos, NO descuento en BD)
+  // 4. Si tiene cliente, sumar punto
   if (id_cliente) {
     await sumarPuntoCliente(tx, id_cliente);
   }
@@ -75,7 +73,6 @@ async function crearVentaConDetalles(
   return venta;
 }
 
-// ✅ Sumar punto al cliente (SOLO puntos, el descuento se calcula en tiempo real)
 async function sumarPuntoCliente(tx, id_cliente) {
   const cliente = await tx.cliente.findUnique({ where: { id_cliente } });
   if (!cliente) throw new Error("Cliente no encontrado");
@@ -87,12 +84,10 @@ async function sumarPuntoCliente(tx, id_cliente) {
     data: {
       puntos: nuevosPuntos,
       numero_compras: (cliente.numero_compras || 0) + 1,
-      // ❌ NO guardamos descuento en BD - se calcula en tiempo real
     },
   });
 }
 
-// Bolivia esta en UTC-4 todo el año (sin horario de verano).
 const OFFSET_BOLIVIA = '-04:00';
 
 async function listarVentas({ desde, hasta } = {}) {
@@ -116,7 +111,6 @@ async function listarVentas({ desde, hasta } = {}) {
   });
 }
 
-// RF-4: buscar productos por nombre (solo lectura)
 async function buscarProductosPorNombre(nombre) {
   return prisma.producto.findMany({
     where: {
@@ -126,7 +120,6 @@ async function buscarProductosPorNombre(nombre) {
     orderBy: { nombre: "asc" },
   });
 }
-
 module.exports = {
   ejecutarTransaccion,
   obtenerProductoPorId,
@@ -136,5 +129,5 @@ module.exports = {
   sumarPuntoCliente,
   listarVentas,
   buscarProductosPorNombre,
-  calcularDescuentoPorPuntos, // Exportado por si se necesita
+  calcularDescuentoPorPuntos,
 };
