@@ -76,6 +76,20 @@ const iconos = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   ),
+  reportes: (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  ),
   salir: (
     <svg
       width="20"
@@ -131,6 +145,7 @@ export default function SidebarCompras() {
         <ItemMenu to="/dashboard" icono={iconos.dashboard} label="Dashboard" />
         <ItemMenu to="/ventas" icono={iconos.ventas} label="Ventas" />
         <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
+	<ItemMenu to="/reportes" icono={iconos.reportes} label="Reportes" />
       </nav>
 
       <button

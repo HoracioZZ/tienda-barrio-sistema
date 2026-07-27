@@ -180,33 +180,46 @@ function Reportes() {
     setErrorProductos("");
     setProductos([]);
 
-    const error = validarPeriodo();
+    const rango = obtenerRangoPeriodo();
 
-    if (error) {
-      setErrorProductos(error);
-      return;
+    if (!rango || !rango.desde || !rango.hasta) {
+        setErrorProductos("Selecciona correctamente el período del reporte.");
+        return;
     }
 
-    const rango = obtenerRangoPeriodo();
+    if (rango.desde > rango.hasta) {
+        setErrorProductos(
+        "La fecha desde no puede ser mayor que la fecha hasta."
+        );
+        return;
+    }
 
     setCargandoProductos(true);
 
     try {
-      const resultado = await productosMasVendidos(
+        console.log("Consultando productos con:");
+        console.log("Desde:", rango.desde);
+        console.log("Hasta:", rango.hasta);
+
+        const resultado = await productosMasVendidos(
         rango.desde,
         rango.hasta
-      );
+        );
 
-      setProductos(Array.isArray(resultado) ? resultado : []);
+        if (Array.isArray(resultado)) {
+        setProductos(resultado);
+        } else {
+        setProductos([]);
+        }
     } catch (error) {
-      console.error("Error productos más vendidos:", error);
+        console.error("Error productos más vendidos:", error);
 
-      setErrorProductos(
+        setErrorProductos(
         error.response?.data?.error ||
-          "No se pudieron obtener los productos más vendidos."
-      );
+            "No se pudieron obtener los productos más vendidos."
+        );
     } finally {
-      setCargandoProductos(false);
+        setCargandoProductos(false);
     }
   }
 
@@ -460,57 +473,69 @@ function Reportes() {
               </p>
             )}
 
-            {productos.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-primary text-white">
-                    <tr>
-                      <th className="p-3 text-sm font-sans">
-                        Posición
-                      </th>
-
-                      <th className="p-3 text-sm font-sans">
-                        Producto
-                      </th>
-
-                      <th className="p-3 text-sm font-sans">
-                        Cantidad vendida
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {productos.map((producto, index) => (
-                      <tr
-                        key={`${producto.nombre}-${index}`}
-                        className="border-t border-stone/10"
-                      >
-                        <td className="p-3 text-ink text-sm">
-                          {index + 1}
-                        </td>
-
-                        <td className="p-3 text-ink text-sm font-semibold">
-                          {producto.nombre}
-                        </td>
-
-                        <td className="p-3 text-primary text-sm font-semibold">
-                          {producto.cantidad}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              !cargandoProductos &&
-              !errorProductos && (
+            {cargandoProductos ? (
                 <div className="border border-stone/10 rounded-lg p-6 text-center">
-                  <p className="text-stone text-sm">
-                    Selecciona un período y pulsa "Consultar" para ver
-                    los productos más vendidos.
-                  </p>
+                    <p className="text-stone text-sm">
+                    Consultando productos más vendidos...
+                    </p>
                 </div>
-              )
+                ) : errorProductos ? (
+                <p className="text-danger text-sm mb-4">
+                    {errorProductos}
+                </p>
+                ) : productos.length > 0 ? (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                    <thead className="bg-primary text-white">
+                        <tr>
+                        <th className="p-3 text-sm font-sans">
+                            Posición
+                        </th>
+
+                        <th className="p-3 text-sm font-sans">
+                            Producto
+                        </th>
+
+                        <th className="p-3 text-sm font-sans">
+                            Cantidad vendida
+                        </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {productos.map((producto, index) => (
+                        <tr
+                            key={`${producto.nombre}-${index}`}
+                            className="border-t border-stone/10"
+                        >
+                            <td className="p-3 text-ink text-sm">
+                            {index + 1}
+                            </td>
+
+                            <td className="p-3 text-ink text-sm font-semibold">
+                            {producto.nombre}
+                            </td>
+
+                            <td className="p-3 text-primary text-sm font-semibold">
+                            {producto.cantidad}
+                            </td>
+                        </tr>
+                        ))}
+                    </tbody>
+                    </table>
+                </div>
+                ) : (
+                <div className="border border-stone/10 rounded-lg p-6 text-center">
+                    <p className="text-stone text-sm">
+                    No hay productos vendidos en el período seleccionado.
+                    </p>
+
+                    {rangoActual && (
+                    <p className="text-stone text-xs mt-2">
+                        Período consultado: {rangoActual.desde} → {rangoActual.hasta}
+                    </p>
+                    )}
+                </div>
             )}
           </div>
 
