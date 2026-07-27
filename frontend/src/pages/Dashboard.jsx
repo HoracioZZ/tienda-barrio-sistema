@@ -31,6 +31,45 @@ export default function Dashboard() {
                 to="/pedidos"
                 className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow w-48"
               >
+                <p className="font-display font-semibold text-primary text-lg mb-1">
+                  Pedidos
+                </p>
+                <p className="text-stone text-sm font-sans">
+                  Pedidos a proveedores
+                </p>
+              </Link>
+            )}
+
+            {usuario?.rol === "Administrador" && (
+              <Link
+                to="/productos"
+                className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow w-48"
+              >
+                <p className="font-display font-semibold text-primary text-lg mb-1">
+                  Productos
+                </p>
+                <p className="text-stone text-sm font-sans">
+                  Catálogo e inventario
+                </p>
+              </Link>
+            )}
+
+            <Link
+              to="/reportes"
+              className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow w-48"
+            >
+              <p className="font-display font-semibold text-primary text-lg mb-1">
+                Reportes
+              </p>
+              <p className="text-stone text-sm font-sans">
+                Ventas, ganancias y productos más vendidos
+              </p>
+            </Link>
+            {usuario?.rol === "Administrador" && (
+              <Link
+                to="/pedidos"
+                className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow w-48"
+              >
                 <p className="font-display font-semibold text-primary text-lg mb-1">Pedidos</p>
                 <p className="text-stone text-sm font-sans">Pedidos a proveedores</p>
               </Link>
@@ -45,7 +84,6 @@ export default function Dashboard() {
                 <p className="text-stone text-sm font-sans">Catálogo e inventario</p>
               </Link>
             )}
-
             {/* Cada integrante agrega aqui su propia tarjeta cuando termine, ej: */}
             {/* <Link to="/inventario" ...>Inventario</Link> */}
           </div>
