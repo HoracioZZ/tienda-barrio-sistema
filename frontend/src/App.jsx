@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import VentasPage from "./pages/VentasPage";
 import RutaProtegida from "./components/RutaProtegida";
 import Pedidos from "./pages/Pedidos";
+import Productos from "./pages/Productos";
 import Clientes from "./pages/Clientes";
 
 function App() {
@@ -28,10 +29,26 @@ function App() {
           }
         />
         <Route
+          path="/productos"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador"]}>
+              <Productos />
+            </RutaProtegida>
+          }
+        />
+        <Route
           path="/clientes"
           element={
             <RutaProtegida rolesPermitidos={["Administrador"]}>
               <Clientes />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/ventas"
+          element={
+            <RutaProtegida rolesPermitidos={["Administrador", "Vendedor"]}>
+              <VentasPage />
             </RutaProtegida>
           }
         />
@@ -43,16 +60,6 @@ function App() {
             <ReportesPage />
           </RutaProtegida>
         } /> */}
-
-        {/* Administrador y Vendedor pueden entrar a ventas */}
-        <Route
-          path="/ventas"
-          element={
-            <RutaProtegida rolesPermitidos={["Administrador", "Vendedor"]}>
-              <VentasPage />
-            </RutaProtegida>
-          }
-        />
       </Routes>
     </BrowserRouter>
   );
