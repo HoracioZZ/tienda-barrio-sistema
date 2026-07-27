@@ -177,6 +177,11 @@ function VentasPage() {
     0,
   );
 
+  // ✅ Calcular total con descuento
+  const descuentoAplicado = clienteSeleccionado?.descuento || 0;
+  const totalConDescuento = total * (1 - descuentoAplicado / 100);
+  const ahorro = total - totalConDescuento;
+
   async function confirmarVenta() {
     setError("");
     setExito("");
@@ -194,14 +199,27 @@ function VentasPage() {
         })),
       };
 
-      if (clienteSeleccionado) {
-        payload.id_cliente = clienteSeleccionado.id_cliente;
+      const clienteId = clienteSeleccionado?.id_cliente;
+      if (clienteId) {
+        payload.id_cliente = clienteId;
       }
+
+      // ✅ Enviar total con descuento
+      payload.total = totalConDescuento;
 
       const venta = await registrarVenta(payload);
 
+      if (clienteId) {
+        try {
+          await api.patch(`/clientes/${clienteId}/sumar-punto`);
+          await cargarClientes();
+        } catch (puntoError) {
+          console.error("Error sumando punto:", puntoError);
+        }
+      }
+
       const mensajeCliente = clienteSeleccionado
-        ? ` con cliente ${clienteSeleccionado.nombre} (se sumaron puntos)`
+        ? ` con cliente ${clienteSeleccionado.nombre} (${descuentoAplicado}% descuento aplicado)`
         : " (venta libre)";
 
       setExito(
@@ -292,7 +310,7 @@ function VentasPage() {
                         {clienteSeleccionado.nombre}
                         <span className="text-sm text-stone font-normal ml-1">
                           (Cód: {clienteSeleccionado.id_cliente} | Puntos:{" "}
-                          {clienteSeleccionado.puntos ?? 0})
+                          {clienteSeleccionado.puntos ?? 0} | Descuento: {clienteSeleccionado.descuento ?? 0}%)
                         </span>
                       </span>
                     ) : (
@@ -394,6 +412,7 @@ function VentasPage() {
                                   <span>Cód: {cliente.id_cliente}</span>
                                   <span>{cliente.telefono}</span>
                                   <span>⭐ Puntos: {cliente.puntos ?? 0}</span>
+                                  <span>🏷️ {cliente.descuento ?? 0}%</span>
                                 </div>
                               </div>
                               <span className="text-primary text-sm font-medium ml-2">
@@ -512,9 +531,29 @@ function VentasPage() {
               {/* Total y confirmar */}
               <div className="flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg shadow p-6">
                 <div>
+                  {/* Precio original tachado si hay descuento */}
+                  {clienteSeleccionado && descuentoAplicado > 0 && (
+                    <div className="text-sm text-stone line-through">
+                      Bs {total.toFixed(2)}
+                    </div>
+                  )}
+
                   <p className="font-mono text-2xl text-primary font-semibold">
-                    Total: Bs {total.toFixed(2)}
+                    Total: Bs {totalConDescuento.toFixed(2)}
                   </p>
+
+                  {/* Mostrar descuento aplicado */}
+                  {clienteSeleccionado && descuentoAplicado > 0 && (
+                    <div className="text-sm">
+                      <span className="text-success font-semibold">
+                        {descuentoAplicado}% descuento aplicado
+                      </span>
+                      <span className="text-stone ml-2">
+                        (Ahorro: Bs {ahorro.toFixed(2)})
+                      </span>
+                    </div>
+                  )}
+
                   {clienteSeleccionado && (
                     <p className="text-sm text-success mt-1">
                       Cliente: {clienteSeleccionado.nombre} - Se sumarán puntos

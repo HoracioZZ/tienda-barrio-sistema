@@ -12,6 +12,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        
         <Route
           path="/dashboard"
           element={
@@ -20,6 +21,7 @@ function App() {
             </RutaProtegida>
           }
         />
+        
         <Route
           path="/pedidos"
           element={
@@ -28,6 +30,7 @@ function App() {
             </RutaProtegida>
           }
         />
+        
         <Route
           path="/productos"
           element={
@@ -36,14 +39,17 @@ function App() {
             </RutaProtegida>
           }
         />
+        
+        {/* ✅ AHORA Vendedor también puede acceder */}
         <Route
           path="/clientes"
           element={
-            <RutaProtegida rolesPermitidos={["Administrador"]}>
+            <RutaProtegida rolesPermitidos={["Administrador", "Vendedor"]}>
               <Clientes />
             </RutaProtegida>
           }
         />
+        
         <Route
           path="/ventas"
           element={

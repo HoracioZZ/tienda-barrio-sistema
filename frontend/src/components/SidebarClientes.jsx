@@ -1,6 +1,5 @@
-// components/SidebarClientes.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../modules/auth/authService";
+import { logout, getUsuarioActual } from "../modules/auth/authService";
 
 const iconos = {
   dashboard: (
@@ -22,6 +21,12 @@ const iconos = {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 11l3 3L22 4" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  ),
+  productos: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M20.59 13.41 12 22l-8.59-8.59a2 2 0 0 1 0-2.82L11 3h9v9l-.41.41z" />
+      <circle cx="7.5" cy="7.5" r="1.5" />
     </svg>
   ),
   clientes: (
@@ -62,6 +67,7 @@ function ItemMenu({ to, icono, label }) {
 
 export default function SidebarClientes() {
   const navigate = useNavigate();
+  const usuario = getUsuarioActual();
 
   function handleLogout() {
     logout();
@@ -71,16 +77,19 @@ export default function SidebarClientes() {
   return (
     <aside className="w-60 min-h-screen bg-primary p-4 flex flex-col">
       <div className="mb-8 px-2">
-        <p className="font-display font-extrabold text-white text-lg">
-          Tiendita
-        </p>
+        <p className="font-display font-extrabold text-white text-lg">Tiendita</p>
         <p className="text-cream/70 text-xs font-sans">Gestión de clientes</p>
       </div>
 
       <nav className="flex-1">
         <ItemMenu to="/dashboard" icono={iconos.dashboard} label="Dashboard" />
         <ItemMenu to="/ventas" icono={iconos.ventas} label="Ventas" />
-        <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
+        {usuario?.rol === "Administrador" && (
+          <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
+        )}
+        {usuario?.rol === "Administrador" && (
+          <ItemMenu to="/productos" icono={iconos.productos} label="Productos" />
+        )}
         <ItemMenu to="/clientes" icono={iconos.clientes} label="Clientes" />
       </nav>
 
