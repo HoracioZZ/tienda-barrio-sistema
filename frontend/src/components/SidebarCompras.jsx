@@ -38,17 +38,10 @@ const iconos = {
     </svg>
   ),
   reportes: (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 20V10" />
+      <path d="M12 20V4" />
+      <path d="M6 20v-6" />
     </svg>
   ),
   salir: (
@@ -98,8 +91,6 @@ export default function SidebarCompras() {
       <nav className="flex-1">
         <ItemMenu to="/dashboard" icono={iconos.dashboard} label="Dashboard" />
         <ItemMenu to="/ventas" icono={iconos.ventas} label="Ventas" />
-        <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
-	<ItemMenu to="/reportes" icono={iconos.reportes} label="Reportes" />
         {usuario?.rol === "Administrador" && (
           <ItemMenu to="/pedidos" icono={iconos.pedidos} label="Pedidos" />
         )}
@@ -108,6 +99,9 @@ export default function SidebarCompras() {
         )}
         {(usuario?.rol === "Administrador" || usuario?.rol === "Vendedor") && (
           <ItemMenu to="/clientes" icono={iconos.clientes} label="Clientes" />
+        )}
+        {usuario?.rol === "Administrador" && (
+          <ItemMenu to="/reportes" icono={iconos.reportes} label="Reportes" />
         )}
       </nav>
 

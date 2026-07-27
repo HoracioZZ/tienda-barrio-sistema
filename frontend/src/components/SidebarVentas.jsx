@@ -37,6 +37,13 @@ const iconos = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   ),
+  reportes: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 20V10" />
+      <path d="M12 20V4" />
+      <path d="M6 20v-6" />
+    </svg>
+  ),
   salir: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -92,6 +99,9 @@ export default function SidebarVentas() {
         )}
         {(usuario?.rol === "Administrador" || usuario?.rol === "Vendedor") && (
           <ItemMenu to="/clientes" icono={iconos.clientes} label="Clientes" />
+        )}
+        {usuario?.rol === "Administrador" && (
+          <ItemMenu to="/reportes" icono={iconos.reportes} label="Reportes" />
         )}
       </nav>
 

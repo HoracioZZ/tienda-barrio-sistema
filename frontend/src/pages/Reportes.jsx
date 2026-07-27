@@ -6,7 +6,7 @@ import {
   compararPeriodos,
 } from "../modules/reportes/reporteService";
 
-import SidebarCompras from "../components/SidebarCompras";
+import SidebarReportes from "../components/SidebarReportes"; // ← CAMBIe
 import HeaderModulo from "../components/HeaderModulo";
 
 function Reportes() {
@@ -318,13 +318,13 @@ function Reportes() {
 
   return (
     <div className="flex min-h-screen bg-cream">
-      <SidebarCompras />
+       <SidebarReportes />
 
       <div className="flex-1 min-w-0">
         <HeaderModulo titulo="Reportes" />
-
+        
         <div className="p-4 md:p-6">
-          <div className="mb-6">
+          {/*<div className="mb-6">
             <h2 className="font-display text-2xl font-bold text-ink">
               Reportes del sistema
             </h2>
@@ -334,8 +334,8 @@ function Reportes() {
               productos más vendidos y
               comparación entre períodos.
             </p>
-          </div>
-
+          </div>*/}
+          
           {/* PERIODO */}
           <div className="bg-white rounded-lg shadow-sm p-5 mb-6">
             <h3 className="font-display font-semibold text-ink mb-4">

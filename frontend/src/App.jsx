@@ -41,7 +41,6 @@ function App() {
           }
         />
         
-        {/* ✅ AHORA Vendedor también puede acceder */}
         <Route
           path="/clientes"
           element={
@@ -66,24 +65,8 @@ function App() {
             <RutaProtegida rolesPermitidos={["Administrador"]}>
               <Reportes />
             </RutaProtegida>
-        }/>
-
-        {/* Administrador y Vendedor pueden entrar a ventas */}
-        <Route
-          path="/ventas"
-          element={
-            <RutaProtegida rolesPermitidos={["Administrador", "Vendedor"]}>
-              <VentasPage />
-            </RutaProtegida>
           }
         />
-        {/* Ejemplo para cuando los compañeros agreguen sus modulos: */}
-        {/* Solo Administrador puede entrar a reportes */}
-        {/* <Route path="/reportes" element={
-          <RutaProtegida rolesPermitidos={['Administrador']}>
-            <ReportesPage />
-          </RutaProtegida>
-        } /> */}
       </Routes>
     </BrowserRouter>
   );
