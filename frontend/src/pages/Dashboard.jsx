@@ -27,7 +27,7 @@ export default function Dashboard() {
               <p className="text-stone text-sm font-sans">Registrar ventas y ver historial</p>
             </Link>
 
-            {/* ✅ Clientes - Admin y Vendedor */}
+            {/* Clientes - Admin y Vendedor */}
             {(usuario?.rol === "Administrador" || usuario?.rol === "Vendedor") && (
               <Link
                 to="/clientes"

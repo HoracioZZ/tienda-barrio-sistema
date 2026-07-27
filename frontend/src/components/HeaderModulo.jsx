@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { getUsuarioActual } from "../modules/auth/authService";
 
-export default function HeaderModulo({ titulo, notificaciones = null }) {
+export default function HeaderModulo({ titulo, notificaciones = null, sugerenciasStock = [] }) {
   const [abierto, setAbierto] = useState(false);
   const ref = useRef(null);
   const usuario = getUsuarioActual();
@@ -18,6 +18,7 @@ export default function HeaderModulo({ titulo, notificaciones = null }) {
   }, []);
 
   const mostrarCampana = notificaciones !== null;
+  const totalNotificaciones = (notificaciones?.length || 0) + sugerenciasStock.length;
 
   return (
     <header className="bg-white border-b border-stone/10 px-6 py-4 flex items-center justify-between">
@@ -42,9 +43,9 @@ export default function HeaderModulo({ titulo, notificaciones = null }) {
                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              {notificaciones.length > 0 && (
+              {totalNotificaciones > 0 && (
                 <span className="absolute -top-2 -right-2 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {notificaciones.length}
+                  {totalNotificaciones}
                 </span>
               )}
             </button>
@@ -70,6 +71,26 @@ export default function HeaderModulo({ titulo, notificaciones = null }) {
                     ))
                   )}
                 </div>
+
+                {sugerenciasStock.length > 0 && (
+                  <>
+                    <div className="px-4 py-2 border-t border-b border-stone/10 bg-cream/50">
+                      <p className="font-display font-semibold text-ink text-sm">
+                        Sugerencias de compra (stock bajo)
+                      </p>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {sugerenciasStock.map((prod) => (
+                        <div key={prod.id_producto} className="px-4 py-2 border-b border-stone/5 last:border-0">
+                          <p className="text-ink text-sm font-sans">{prod.nombre}</p>
+                          <p className="text-danger text-xs font-sans">
+                            Stock: {prod.stock} 
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
