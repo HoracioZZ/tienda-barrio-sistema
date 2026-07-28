@@ -5,6 +5,7 @@ import {
   actualizarProducto,
   registrarProducto,
   eliminarProducto,
+  subirImagenProducto,
 } from "../modules/inventario/productoService";
 import {
   listarCategorias,
@@ -21,6 +22,7 @@ import {
 import SidebarInventario from "../components/SidebarInventario";
 import HeaderModulo from "../components/HeaderModulo";
 import Footer from "../components/Footer";
+import ImagenProducto from "../components/ImagenProducto";
 import {
   TriangleAlert,
   RefreshCw,
@@ -31,6 +33,7 @@ import {
   Trash2,
   RotateCcw,
   Bell,
+  Upload,
 } from "lucide-react";
 
 function Productos() {
@@ -51,6 +54,17 @@ function Productos() {
   const [stockMinimo, setStockMinimo] = useState("");
   const [idCategoria, setIdCategoria] = useState("");
   const [fechaVencimiento, setFechaVencimiento] = useState("");
+
+  // Estados para imagen en nuevo producto
+  const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
+  const [imagenPreview, setImagenPreview] = useState(null);
+  const [imagenError, setImagenError] = useState("");
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+
+  // Estados para imagen en edición
+  const [imagenEditandoSeleccionada, setImagenEditandoSeleccionada] = useState(null);
+  const [imagenEditandoPreview, setImagenEditandoPreview] = useState(null);
+  const [imagenEditandoError, setImagenEditandoError] = useState("");
 
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
@@ -85,6 +99,93 @@ function Productos() {
     cargarDatos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoriaFiltro, mostrarInactivas]);
+
+  // Función para seleccionar imagen en nuevo producto
+  function handleSeleccionarImagenNuevo(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setImagenError("La imagen no puede superar los 5MB");
+      return;
+    }
+
+    const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
+    if (!tiposPermitidos.includes(file.type)) {
+      setImagenError("Solo se permiten formatos JPG, PNG o WEBP");
+      return;
+    }
+
+    setImagenError("");
+    setImagenSeleccionada(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagenPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Función para seleccionar imagen en edición
+  function handleSeleccionarImagenEdicion(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setImagenEditandoError("La imagen no puede superar los 5MB");
+      return;
+    }
+
+    const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
+    if (!tiposPermitidos.includes(file.type)) {
+      setImagenEditandoError("Solo se permiten formatos JPG, PNG o WEBP");
+      return;
+    }
+
+    setImagenEditandoError("");
+    setImagenEditandoSeleccionada(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagenEditandoPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Función para subir imagen en edición
+  async function handleSubirImagenEdicion() {
+    if (!imagenEditandoSeleccionada) return;
+
+    setSubiendoImagen(true);
+    setImagenEditandoError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("imagen", imagenEditandoSeleccionada);
+
+      const productoActualizado = await subirImagenProducto(
+        productoEditando.id_producto,
+        formData
+      );
+
+      await cargarDatos();
+      setExito("Imagen actualizada correctamente");
+
+      setProductoEditando((prev) => ({
+        ...prev,
+        url_imagen: productoActualizado.url_imagen,
+      }));
+
+      setImagenEditandoSeleccionada(null);
+      setImagenEditandoPreview(null);
+    } catch (err) {
+      setImagenEditandoError(
+        err.response?.data?.error || "Error al subir la imagen"
+      );
+    } finally {
+      setSubiendoImagen(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -129,7 +230,7 @@ function Productos() {
 
     setCargando(true);
     try {
-      await registrarProducto({
+      const nuevoProducto = await registrarProducto({
         nombre: nombre.trim(),
         precio_compra: Number(precioCompra),
         precio_venta: Number(precioVenta),
@@ -140,6 +241,13 @@ function Productos() {
           ? `${fechaVencimiento}T00:00:00.000Z`
           : null,
       });
+
+      if (imagenSeleccionada) {
+        const formData = new FormData();
+        formData.append("imagen", imagenSeleccionada);
+        await subirImagenProducto(nuevoProducto.id_producto, formData);
+      }
+
       setExito("Producto registrado correctamente.");
       setNombre("");
       setPrecioCompra("");
@@ -148,6 +256,8 @@ function Productos() {
       setStockMinimo("");
       setIdCategoria("");
       setFechaVencimiento("");
+      setImagenSeleccionada(null);
+      setImagenPreview(null);
       cargarDatos();
     } catch (err) {
       setError(err.response?.data?.error || "Error al registrar el producto.");
@@ -170,7 +280,7 @@ function Productos() {
       cargarDatos();
     } catch (err) {
       setErrorCategoria(
-        err.response?.data?.error || "Error al registrar la categoría.",
+        err.response?.data?.error || "Error al registrar la categoría."
       );
     }
   }
@@ -196,7 +306,7 @@ function Productos() {
       cargarDatos();
     } catch (err) {
       setErrorCategoria(
-        err.response?.data?.error || "Error al actualizar la categoría.",
+        err.response?.data?.error || "Error al actualizar la categoría."
       );
     }
   }
@@ -205,7 +315,7 @@ function Productos() {
     if (!categoriaAEliminar) return;
     try {
       const respuesta = await eliminarCategoria(
-        categoriaAEliminar.id_categoria,
+        categoriaAEliminar.id_categoria
       );
       setCategoriaAEliminar(null);
       await cargarDatos();
@@ -242,8 +352,12 @@ function Productos() {
       fecha_vencimiento: p.fecha_vencimiento
         ? p.fecha_vencimiento.slice(0, 10)
         : "",
+      url_imagen: p.url_imagen,
     });
     setErrorEdicion("");
+    setImagenEditandoSeleccionada(null);
+    setImagenEditandoPreview(null);
+    setImagenEditandoError("");
   }
 
   async function handleGuardarEdicion(e) {
@@ -255,7 +369,7 @@ function Productos() {
       Number(productoEditando.precio_compra)
     ) {
       setErrorEdicion(
-        "El precio de venta no puede ser menor al precio de compra.",
+        "El precio de venta no puede ser menor al precio de compra."
       );
       return;
     }
@@ -283,14 +397,14 @@ function Productos() {
       cargarDatos();
     } catch (err) {
       setErrorEdicion(
-        err.response?.data?.error || "Error al actualizar el producto.",
+        err.response?.data?.error || "Error al actualizar el producto."
       );
     }
   }
 
   const sugerencias = busquedaProducto
     ? productos.filter((p) =>
-        p.nombre.toLowerCase().startsWith(busquedaProducto.toLowerCase()),
+        p.nombre.toLowerCase().startsWith(busquedaProducto.toLowerCase())
       )
     : [];
 
@@ -455,6 +569,54 @@ function Productos() {
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
+
+                {/* Campo para imagen al crear producto */}
+                <div className="sm:col-span-2">
+                  <label className="block text-sm text-stone mb-1">
+                    Imagen del producto (opcional)
+                  </label>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {imagenPreview && (
+                      <img
+                        src={imagenPreview}
+                        alt="Vista previa"
+                        className="w-16 h-16 rounded-lg border border-stone/20 object-cover"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <label className="cursor-pointer">
+                        <div className="flex items-center gap-2 bg-cream hover:bg-primary/10 text-ink px-3 py-2 rounded-lg border border-stone/20 transition-colors text-sm">
+                          <Upload className="w-4 h-4" />
+                          {subiendoImagen ? "Subiendo..." : "Seleccionar imagen"}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          onChange={handleSeleccionarImagenNuevo}
+                          className="hidden"
+                        />
+                      </label>
+                      {imagenError && (
+                        <p className="text-danger text-xs mt-1">{imagenError}</p>
+                      )}
+                      <p className="text-stone text-[10px] mt-1">
+                        JPG, PNG o WEBP (máx. 5MB)
+                      </p>
+                    </div>
+                    {imagenSeleccionada && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagenSeleccionada(null);
+                          setImagenPreview(null);
+                        }}
+                        className="text-danger hover:text-danger/70 text-sm"
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {error && <p className="text-danger text-sm">{error}</p>}
@@ -502,7 +664,7 @@ function Productos() {
               <ul className="space-y-1 max-h-56 overflow-y-auto">
                 {categorias.map((c) => {
                   const productosEnCategoria = productos.filter(
-                    (p) => p.id_categoria === c.id_categoria,
+                    (p) => p.id_categoria === c.id_categoria
                   ).length;
                   return (
                     <li
@@ -545,7 +707,7 @@ function Productos() {
                               } catch (err) {
                                 setError(
                                   err.response?.data?.error ||
-                                    "Error al reactivar",
+                                    "Error al reactivar"
                                 );
                               }
                             }}
@@ -640,6 +802,9 @@ function Productos() {
                 <thead className="bg-primary text-white">
                   <tr>
                     <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Imagen
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
                       Nombre
                     </th>
                     <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
@@ -664,10 +829,15 @@ function Productos() {
                 </thead>
                 <tbody>
                   {productosMostrados.map((p) => (
-                    <tr
-                      key={p.id_producto}
-                      className="border-t border-stone/10"
-                    >
+                    <tr key={p.id_producto} className="border-t border-stone/10">
+                      <td className="p-2 sm:p-3">
+                        <ImagenProducto
+                          url={p.url_imagen}
+                          nombre={p.nombre}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-stone/20"
+                          fallbackText="📦"
+                        />
+                      </td>
                       <td className="p-2 sm:p-3 text-ink text-xs sm:text-sm">
                         {p.nombre}
                       </td>
@@ -770,10 +940,7 @@ function Productos() {
             <h3 className="font-display font-semibold text-ink mb-4 text-base sm:text-lg">
               Editar categoría
             </h3>
-            <form
-              onSubmit={handleGuardarEdicionCategoria}
-              className="space-y-3"
-            >
+            <form onSubmit={handleGuardarEdicionCategoria} className="space-y-3">
               <div>
                 <label className="block text-sm text-stone mb-1">Nombre</label>
                 <input
@@ -883,7 +1050,7 @@ function Productos() {
       {/* Modal editar producto */}
       {productoEditando && (
         <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-sm sm:max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="font-display font-semibold text-ink mb-4 text-base sm:text-lg">
               Editar producto
             </h3>
@@ -1004,6 +1171,52 @@ function Productos() {
                     }
                     className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
+                </div>
+              </div>
+
+              {/* Sección de imagen en edición */}
+              <div className="border-t border-stone/10 pt-3 mt-2">
+                <label className="block text-sm text-stone mb-2">
+                  Imagen del producto
+                </label>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <ImagenProducto
+                    url={imagenEditandoPreview || productoEditando.url_imagen}
+                    nombre={productoEditando.nombre}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg border border-stone/20"
+                    fallbackText="📦"
+                  />
+                  <div className="flex-1">
+                    <label className="cursor-pointer">
+                      <div className="flex items-center gap-2 bg-cream hover:bg-primary/10 text-ink px-3 py-2 rounded-lg border border-stone/20 transition-colors text-sm">
+                        <Upload className="w-4 h-4" />
+                        {subiendoImagen ? "Subiendo..." : "Cambiar imagen"}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleSeleccionarImagenEdicion}
+                        disabled={subiendoImagen}
+                        className="hidden"
+                      />
+                    </label>
+                    {imagenEditandoError && (
+                      <p className="text-danger text-xs mt-1">{imagenEditandoError}</p>
+                    )}
+                    <p className="text-stone text-[10px] mt-1">
+                      JPG, PNG o WEBP (máx. 5MB)
+                    </p>
+                  </div>
+                  {imagenEditandoSeleccionada && (
+                    <button
+                      type="button"
+                      onClick={handleSubirImagenEdicion}
+                      disabled={subiendoImagen}
+                      className="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-sm disabled:opacity-50"
+                    >
+                      {subiendoImagen ? "Subiendo..." : "Guardar imagen"}
+                    </button>
+                  )}
                 </div>
               </div>
 
