@@ -1,12 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 import { getUsuarioActual } from "../modules/auth/authService";
+import { Menu, Bell } from "lucide-react";
+import { useSidebar } from "../context/SidebarContext";
 
-export default function HeaderModulo({ titulo, notificaciones = null, sugerenciasStock = [] }) {
+export default function HeaderModulo({
+  titulo,
+  notificaciones = null,
+  sugerenciasStock = [],
+}) {
+  const { isOpen, setIsOpen } = useSidebar();
   const [abierto, setAbierto] = useState(false);
   const ref = useRef(null);
   const usuario = getUsuarioActual();
   const iniciales = usuario?.nombre
-    ? usuario.nombre.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase()
+    ? usuario.nombre
+        .split(" ")
+        .map((p) => p[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
     : "AD";
 
   useEffect(() => {
@@ -18,49 +30,62 @@ export default function HeaderModulo({ titulo, notificaciones = null, sugerencia
   }, []);
 
   const mostrarCampana = notificaciones !== null;
-  const totalNotificaciones = (notificaciones?.length || 0) + sugerenciasStock.length;
+  const totalNotificaciones =
+    (notificaciones?.length || 0) + sugerenciasStock.length;
 
   return (
-    <header className="bg-white border-b border-stone/10 px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ink">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
-        <h1 className="font-display text-2xl font-bold text-primary">{titulo}</h1>
+    <header className="bg-white border-b border-stone/10 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      {/* Lado izquierdo: hamburguesa + título */}
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        {/* Botón hamburguesa - visible solo en móvil */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="lg:hidden p-1.5 rounded-lg hover:bg-cream transition-colors text-ink"
+          aria-label="Abrir menú"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <h1 className="font-display text-xl sm:text-2xl font-bold text-primary truncate">
+          {titulo}
+        </h1>
       </div>
 
-      <div className="flex items-center gap-5">
+      {/* Lado derecho: notificaciones + usuario */}
+      <div className="flex items-center gap-3 sm:gap-5 shrink-0">
         {mostrarCampana && (
           <div className="relative" ref={ref}>
             <button
               onClick={() => setAbierto((v) => !v)}
-              className="relative translate-y-0.5"
+              className="relative p-1 hover:bg-cream rounded-lg transition-colors"
               aria-label="Notificaciones"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-stone">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
+              <Bell className="w-5 h-5 text-stone" />
               {totalNotificaciones > 0 && (
-                <span className="absolute -top-2 -right-2 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {totalNotificaciones}
+                <span className="absolute -top-1 -right-1 bg-danger text-white text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
+                  {totalNotificaciones > 9 ? "9+" : totalNotificaciones}
                 </span>
               )}
             </button>
 
             {abierto && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-stone/10 z-10">
-                <div className="px-4 py-2 border-b border-stone/10">
-                  <p className="font-display font-semibold text-ink text-sm">Pedidos pendientes</p>
+              <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-stone/10 z-50 max-h-[80vh] overflow-y-auto">
+                <div className="px-4 py-2 border-b border-stone/10 sticky top-0 bg-white">
+                  <p className="font-display font-semibold text-ink text-sm">
+                    Pedidos pendientes
+                  </p>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notificaciones.length === 0 ? (
-                    <p className="px-4 py-3 text-stone text-sm font-sans">No hay pedidos pendientes.</p>
+                    <p className="px-4 py-3 text-stone text-sm font-sans">
+                      No hay pedidos pendientes.
+                    </p>
                   ) : (
                     notificaciones.map((n) => (
-                      <div key={n.id_pedido} className="px-4 py-2 border-b border-stone/5 last:border-0">
+                      <div
+                        key={n.id_pedido}
+                        className="px-4 py-2 border-b border-stone/5 last:border-0"
+                      >
                         <p className="text-ink text-sm font-sans">
                           Pedido #{n.id_pedido} — {n.proveedor?.nombre}
                         </p>
@@ -74,17 +99,22 @@ export default function HeaderModulo({ titulo, notificaciones = null, sugerencia
 
                 {sugerenciasStock.length > 0 && (
                   <>
-                    <div className="px-4 py-2 border-t border-b border-stone/10 bg-cream/50">
+                    <div className="px-4 py-2 border-t border-b border-stone/10 bg-cream/50 sticky top-0">
                       <p className="font-display font-semibold text-ink text-sm">
                         Sugerencias de compra (stock bajo)
                       </p>
                     </div>
                     <div className="max-h-48 overflow-y-auto">
                       {sugerenciasStock.map((prod) => (
-                        <div key={prod.id_producto} className="px-4 py-2 border-b border-stone/5 last:border-0">
-                          <p className="text-ink text-sm font-sans">{prod.nombre}</p>
+                        <div
+                          key={prod.id_producto}
+                          className="px-4 py-2 border-b border-stone/5 last:border-0"
+                        >
+                          <p className="text-ink text-sm font-sans">
+                            {prod.nombre}
+                          </p>
                           <p className="text-danger text-xs font-sans">
-                            Stock: {prod.stock} 
+                            Stock: {prod.stock}
                           </p>
                         </div>
                       ))}
@@ -96,11 +126,16 @@ export default function HeaderModulo({ titulo, notificaciones = null, sugerencia
           </div>
         )}
 
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] sm:text-xs font-semibold shrink-0">
             {iniciales}
           </div>
-          <span className="text-ink text-sm font-sans">{usuario?.nombre || "Admin"}</span>
+          <span className="text-sm text-ink font-sans hidden sm:block truncate max-w-24">
+            {usuario?.nombre || "Admin"}
+          </span>
+          <span className="text-sm text-ink font-sans sm:hidden truncate max-w-16">
+            {usuario?.nombre?.split(" ")[0] || "Admin"}
+          </span>
         </div>
       </div>
     </header>

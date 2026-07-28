@@ -67,7 +67,7 @@ function Productos() {
   async function cargarDatos() {
     try {
       const [cats, prods, alts] = await Promise.all([
-        listarCategorias(mostrarInactivas), // pasar el flag
+        listarCategorias(mostrarInactivas),
         categoriaFiltro
           ? listarProductosPorCategoria(categoriaFiltro)
           : listarProductos(),
@@ -209,7 +209,6 @@ function Productos() {
       );
       setCategoriaAEliminar(null);
       await cargarDatos();
-      // Mostrar mensaje de éxito con la información que venga del backend
       if (respuesta?.mensaje) {
         setExito(respuesta.mensaje);
       } else {
@@ -311,13 +310,15 @@ function Productos() {
   return (
     <div className="flex min-h-screen bg-cream">
       <SidebarInventario />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <HeaderModulo titulo="Productos y Catálogo" />
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Alertas */}
-          <div className="flex items-center justify-between mb-2">
-            <p className="font-display font-semibold text-ink">Alertas</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2 sm:gap-0">
+            <p className="font-display font-semibold text-ink text-base sm:text-lg">
+              Alertas
+            </p>
             <button
               onClick={async () => {
                 await verificarAlertas();
@@ -330,13 +331,16 @@ function Productos() {
             </button>
           </div>
           {alertas.length > 0 && (
-            <div className="bg-danger/10 border border-danger/20 rounded-lg p-4 mb-6">
-              <p className="font-display font-semibold text-danger mb-2">
+            <div className="bg-danger/10 border border-danger/20 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+              <p className="font-display font-semibold text-danger mb-2 text-sm sm:text-base">
                 {alertas.length} pendiente(s)
               </p>
               <ul className="space-y-1">
                 {alertas.map((a) => (
-                  <li key={a.id_alerta} className="text-sm text-ink font-sans">
+                  <li
+                    key={a.id_alerta}
+                    className="text-xs sm:text-sm text-ink font-sans"
+                  >
                     {a.mensaje}
                   </li>
                 ))}
@@ -345,17 +349,17 @@ function Productos() {
           )}
 
           {/* Fila superior: formulario + categorias */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
             <form
               onSubmit={handleSubmit}
-              className="lg:col-span-2 bg-white rounded-lg shadow-sm p-5 space-y-3"
+              className="md:col-span-2 bg-white rounded-lg shadow-sm p-4 sm:p-5 space-y-3"
             >
-              <h2 className="font-display font-semibold text-ink mb-2">
+              <h2 className="font-display font-semibold text-ink mb-2 text-base sm:text-lg">
                 Nuevo producto
               </h2>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
                   <label className="block text-sm text-stone mb-1">
                     Nombre
                   </label>
@@ -364,7 +368,7 @@ function Productos() {
                     placeholder="Nombre del producto"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
@@ -378,7 +382,7 @@ function Productos() {
                     placeholder="0.00"
                     value={precioCompra}
                     onChange={(e) => setPrecioCompra(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
@@ -392,7 +396,7 @@ function Productos() {
                     placeholder="0.00"
                     value={precioVenta}
                     onChange={(e) => setPrecioVenta(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
@@ -405,7 +409,7 @@ function Productos() {
                     placeholder="0"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
@@ -418,7 +422,7 @@ function Productos() {
                     placeholder="5"
                     value={stockMinimo}
                     onChange={(e) => setStockMinimo(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
@@ -429,7 +433,7 @@ function Productos() {
                   <select
                     value={idCategoria}
                     onChange={(e) => setIdCategoria(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   >
                     <option value="">Selecciona categoría</option>
                     {categorias.map((c) => (
@@ -448,7 +452,7 @@ function Productos() {
                     type="date"
                     value={fechaVencimiento}
                     onChange={(e) => setFechaVencimiento(e.target.value)}
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
               </div>
@@ -459,25 +463,25 @@ function Productos() {
               <button
                 type="submit"
                 disabled={cargando}
-                className="bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg px-4 py-2 disabled:opacity-50"
+                className="bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg px-4 py-2 disabled:opacity-50 text-sm sm:text-base"
               >
                 {cargando ? "Guardando..." : "Registrar producto"}
               </button>
             </form>
 
             {/* Lista de categorias con editar/eliminar */}
-            <div className="bg-white rounded-lg shadow-sm p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="font-display font-semibold text-ink">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
+                <p className="font-display font-semibold text-ink text-sm sm:text-base">
                   Categorías
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={() => setMostrarInactivas(!mostrarInactivas)}
-                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded border ${
+                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded border transition-colors ${
                       mostrarInactivas
                         ? "bg-primary text-white border-primary"
-                        : "bg-white text-stone border-stone/30"
+                        : "bg-white text-stone border-stone/30 hover:bg-cream"
                     }`}
                   >
                     {mostrarInactivas ? (
@@ -497,27 +501,26 @@ function Productos() {
               </div>
               <ul className="space-y-1 max-h-56 overflow-y-auto">
                 {categorias.map((c) => {
-                  // Contar cuántos productos tienen esta categoría
                   const productosEnCategoria = productos.filter(
                     (p) => p.id_categoria === c.id_categoria,
                   ).length;
                   return (
                     <li
                       key={c.id_categoria}
-                      className="flex items-center justify-between text-sm py-1.5 border-b border-stone/10 last:border-0"
+                      className="flex flex-wrap items-center justify-between text-sm py-1.5 border-b border-stone/10 last:border-0 gap-1"
                     >
-                      <span className="text-ink flex items-center gap-2">
+                      <span className="text-ink flex items-center gap-2 text-xs sm:text-sm">
                         {c.nombre}
                         {!c.estado && (
-                          <span className="text-xs bg-danger/20 text-danger px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] sm:text-xs bg-danger/20 text-danger px-2 py-0.5 rounded-full">
                             Inactiva
                           </span>
                         )}
                       </span>
-                      <span className="space-x-2">
+                      <span className="flex items-center gap-1 sm:gap-2">
                         <button
                           onClick={() => abrirEdicionCategoria(c)}
-                          className="text-primary hover:text-primary-dark font-sans"
+                          className="text-primary hover:text-primary-dark font-sans text-xs sm:text-sm"
                         >
                           Editar
                         </button>
@@ -529,7 +532,7 @@ function Productos() {
                                 productosCount: productosEnCategoria,
                               })
                             }
-                            className="text-danger hover:text-danger/70 font-sans"
+                            className="text-danger hover:text-danger/70 font-sans text-xs sm:text-sm"
                           >
                             Eliminar
                           </button>
@@ -546,7 +549,7 @@ function Productos() {
                                 );
                               }
                             }}
-                            className="text-success hover:text-success/70 font-sans"
+                            className="text-success hover:text-success/70 font-sans text-xs sm:text-sm"
                           >
                             Reactivar
                           </button>
@@ -561,16 +564,16 @@ function Productos() {
 
           {/* Tabla de productos */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-stone/10 gap-3">
-              <h2 className="font-display font-semibold text-ink">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border-b border-stone/10 gap-2 sm:gap-3">
+              <h2 className="font-display font-semibold text-ink text-sm sm:text-base">
                 Catálogo de productos
               </h2>
 
-              <div className="flex items-center gap-3">
-                <div className="relative">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none min-w-30">
                   <input
                     type="text"
-                    placeholder="Buscar producto por nombre..."
+                    placeholder="Buscar producto..."
                     value={busquedaProducto}
                     onChange={(e) => {
                       setBusquedaProducto(e.target.value);
@@ -578,12 +581,12 @@ function Productos() {
                       setMostrarSugerencias(true);
                     }}
                     onFocus={() => setMostrarSugerencias(true)}
-                    className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink w-56 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full sm:w-48 border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                   {mostrarSugerencias &&
                     busquedaProducto &&
                     !productoFiltrado && (
-                      <div className="absolute z-10 mt-1 w-56 bg-white border border-stone/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-stone/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                         {sugerencias.length === 0 ? (
                           <p className="px-3 py-2 text-stone text-sm font-sans">
                             Sin resultados.
@@ -620,7 +623,7 @@ function Productos() {
                     setCategoriaFiltro(e.target.value);
                     limpiarBusqueda();
                   }}
-                  className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="border border-stone/20 rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-primary/40 min-w-30"
                 >
                   <option value="">Todas las categorías</option>
                   {categorias.map((c) => (
@@ -632,65 +635,86 @@ function Productos() {
               </div>
             </div>
 
-            <table className="w-full text-left">
-              <thead className="bg-primary text-white">
-                <tr>
-                  <th className="p-3 text-sm font-sans">Nombre</th>
-                  <th className="p-3 text-sm font-sans">Categoría</th>
-                  <th className="p-3 text-sm font-sans">Precio compra</th>
-                  <th className="p-3 text-sm font-sans">Precio venta</th>
-                  <th className="p-3 text-sm font-sans">Stock</th>
-                  <th className="p-3 text-sm font-sans">Vencimiento</th>
-                  <th className="p-3 text-sm font-sans">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productosMostrados.map((p) => (
-                  <tr key={p.id_producto} className="border-t border-stone/10">
-                    <td className="p-3 text-ink text-sm">{p.nombre}</td>
-                    <td className="p-3 text-ink text-sm">
-                      {p.categoria?.nombre}
-                    </td>
-                    <td className="p-3 font-mono text-ink text-sm">
-                      Bs {p.precio_compra}
-                    </td>
-                    <td className="p-3 font-mono text-primary text-sm font-semibold">
-                      Bs {p.precio_venta}
-                    </td>
-                    <td className="p-3 text-sm">
-                      <span
-                        className={
-                          p.stock <= p.stock_minimo
-                            ? "text-danger font-semibold"
-                            : "text-ink"
-                        }
-                      >
-                        {p.stock}
-                      </span>
-                    </td>
-                    <td className="p-3 text-ink text-sm">
-                      {p.fecha_vencimiento
-                        ? new Date(p.fecha_vencimiento).toLocaleDateString()
-                        : "—"}
-                    </td>
-                    <td className="p-3 space-x-3">
-                      <button
-                        onClick={() => abrirEdicion(p)}
-                        className="text-primary hover:text-primary-dark text-sm font-sans"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => setProductoAEliminar(p)}
-                        className="text-danger hover:text-danger/70 text-sm font-sans"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-primary text-white">
+                  <tr>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Nombre
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Categoría
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Precio compra
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Precio venta
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Stock
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Vencimiento
+                    </th>
+                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-sans">
+                      Acciones
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {productosMostrados.map((p) => (
+                    <tr
+                      key={p.id_producto}
+                      className="border-t border-stone/10"
+                    >
+                      <td className="p-2 sm:p-3 text-ink text-xs sm:text-sm">
+                        {p.nombre}
+                      </td>
+                      <td className="p-2 sm:p-3 text-ink text-xs sm:text-sm">
+                        {p.categoria?.nombre}
+                      </td>
+                      <td className="p-2 sm:p-3 font-mono text-ink text-xs sm:text-sm">
+                        Bs {p.precio_compra}
+                      </td>
+                      <td className="p-2 sm:p-3 font-mono text-primary text-xs sm:text-sm font-semibold">
+                        Bs {p.precio_venta}
+                      </td>
+                      <td className="p-2 sm:p-3 text-xs sm:text-sm">
+                        <span
+                          className={
+                            p.stock <= p.stock_minimo
+                              ? "text-danger font-semibold"
+                              : "text-ink"
+                          }
+                        >
+                          {p.stock}
+                        </span>
+                      </td>
+                      <td className="p-2 sm:p-3 text-ink text-xs sm:text-sm">
+                        {p.fecha_vencimiento
+                          ? new Date(p.fecha_vencimiento).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td className="p-2 sm:p-3 space-x-2 sm:space-x-3 whitespace-nowrap">
+                        <button
+                          onClick={() => abrirEdicion(p)}
+                          className="text-primary hover:text-primary-dark text-xs sm:text-sm font-sans"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => setProductoAEliminar(p)}
+                          className="text-danger hover:text-danger/70 text-xs sm:text-sm font-sans"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         <Footer />
@@ -698,9 +722,9 @@ function Productos() {
 
       {/* Modal registrar categoría */}
       {modalCategoriaAbierto && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h3 className="font-display font-semibold text-ink mb-4">
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-xs sm:max-w-sm">
+            <h3 className="font-display font-semibold text-ink mb-4 text-base sm:text-lg">
               Registrar categoría
             </h3>
             <form onSubmit={handleCrearCategoria} className="space-y-3">
@@ -710,7 +734,7 @@ function Productos() {
                   type="text"
                   value={nuevaCategoriaNombre}
                   onChange={(e) => setNuevaCategoriaNombre(e.target.value)}
-                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
               {errorCategoria && (
@@ -723,13 +747,13 @@ function Productos() {
                     setModalCategoriaAbierto(false);
                     setErrorCategoria("");
                   }}
-                  className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-stone font-sans text-xs sm:text-sm hover:bg-cream"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm"
                 >
                   Agregar
                 </button>
@@ -741,9 +765,9 @@ function Productos() {
 
       {/* Modal editar categoría */}
       {categoriaEditando && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h3 className="font-display font-semibold text-ink mb-4">
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-xs sm:max-w-sm">
+            <h3 className="font-display font-semibold text-ink mb-4 text-base sm:text-lg">
               Editar categoría
             </h3>
             <form
@@ -756,7 +780,7 @@ function Productos() {
                   type="text"
                   value={nombreEditandoCategoria}
                   onChange={(e) => setNombreEditandoCategoria(e.target.value)}
-                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
               {errorCategoria && (
@@ -769,13 +793,13 @@ function Productos() {
                     setCategoriaEditando(null);
                     setErrorCategoria("");
                   }}
-                  className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-stone font-sans text-xs sm:text-sm hover:bg-cream"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm"
                 >
                   Guardar cambios
                 </button>
@@ -787,9 +811,9 @@ function Productos() {
 
       {/* Modal confirmar eliminacion de categoría */}
       {categoriaAEliminar && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm text-center">
-            <h3 className="font-display font-semibold text-ink mb-2">
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-xs sm:max-w-sm text-center">
+            <h3 className="font-display font-semibold text-ink mb-2 text-base sm:text-lg">
               Eliminar categoría
             </h3>
             <p className="text-stone text-sm font-sans mb-4">
@@ -797,7 +821,7 @@ function Productos() {
               <strong>{categoriaAEliminar.nombre}</strong>?
             </p>
             {categoriaAEliminar.productosCount > 0 && (
-              <div className="bg-danger/10 border border-danger/20 rounded-lg p-3 mb-4 text-sm text-danger font-sans flex items-start gap-2">
+              <div className="bg-danger/10 border border-danger/20 rounded-lg p-3 mb-4 text-sm text-danger font-sans flex items-start gap-2 text-left">
                 <TriangleAlert className="w-5 h-5 shrink-0 mt-0.5" />
                 <div>
                   Esta categoría tiene{" "}
@@ -812,13 +836,13 @@ function Productos() {
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => setCategoriaAEliminar(null)}
-                className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-stone font-sans text-xs sm:text-sm hover:bg-cream"
               >
                 Cancelar
               </button>
               <button
                 onClick={confirmarEliminarCategoria}
-                className="px-4 py-2 rounded-lg bg-danger hover:bg-danger/80 text-white font-semibold text-sm"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-danger hover:bg-danger/80 text-white font-semibold text-xs sm:text-sm"
               >
                 Eliminar
               </button>
@@ -829,9 +853,9 @@ function Productos() {
 
       {/* Modal confirmar eliminacion de producto */}
       {productoAEliminar && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm text-center">
-            <h3 className="font-display font-semibold text-ink mb-2">
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-xs sm:max-w-sm text-center">
+            <h3 className="font-display font-semibold text-ink mb-2 text-base sm:text-lg">
               Eliminar producto
             </h3>
             <p className="text-stone text-sm font-sans mb-6">
@@ -841,13 +865,13 @@ function Productos() {
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => setProductoAEliminar(null)}
-                className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-stone font-sans text-xs sm:text-sm hover:bg-cream"
               >
                 Cancelar
               </button>
               <button
                 onClick={confirmarEliminarProducto}
-                className="px-4 py-2 rounded-lg bg-danger hover:bg-danger/80 text-white font-semibold text-sm"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-danger hover:bg-danger/80 text-white font-semibold text-xs sm:text-sm"
               >
                 Eliminar
               </button>
@@ -858,9 +882,9 @@ function Productos() {
 
       {/* Modal editar producto */}
       {productoEditando && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h3 className="font-display font-semibold text-ink mb-4">
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-5 sm:p-6 w-full max-w-sm sm:max-w-md">
+            <h3 className="font-display font-semibold text-ink mb-4 text-base sm:text-lg">
               Editar producto
             </h3>
             <form onSubmit={handleGuardarEdicion} className="space-y-3">
@@ -875,11 +899,11 @@ function Productos() {
                       nombre: e.target.value,
                     })
                   }
-                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-stone mb-1">
                     Precio compra
@@ -894,7 +918,7 @@ function Productos() {
                         precio_compra: e.target.value,
                       })
                     }
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
@@ -911,7 +935,7 @@ function Productos() {
                         precio_venta: e.target.value,
                       })
                     }
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
@@ -925,7 +949,7 @@ function Productos() {
                         stock: e.target.value,
                       })
                     }
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
@@ -941,7 +965,7 @@ function Productos() {
                         stock_minimo: e.target.value,
                       })
                     }
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
                 <div>
@@ -956,7 +980,7 @@ function Productos() {
                         id_categoria: e.target.value,
                       })
                     }
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   >
                     {categorias.map((c) => (
                       <option key={c.id_categoria} value={c.id_categoria}>
@@ -978,7 +1002,7 @@ function Productos() {
                         fecha_vencimiento: e.target.value,
                       })
                     }
-                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full border border-stone/20 rounded-lg px-3 py-2 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
               </div>
@@ -991,13 +1015,13 @@ function Productos() {
                 <button
                   type="button"
                   onClick={() => setProductoEditando(null)}
-                  className="px-4 py-2 rounded-lg text-stone font-sans text-sm hover:bg-cream"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-stone font-sans text-xs sm:text-sm hover:bg-cream"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-sm"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold text-xs sm:text-sm"
                 >
                   Guardar cambios
                 </button>

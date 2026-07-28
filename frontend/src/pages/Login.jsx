@@ -21,30 +21,30 @@ export default function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-cream">
+    <div className="flex items-center justify-center min-h-screen bg-cream px-4 sm:px-0">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-80 space-y-4"
+        className="bg-white p-6 sm:p-8 rounded-lg shadow-md w-full max-w-sm sm:max-w-md space-y-4"
       >
-        <h1 className="font-display font-extrabold text-2xl text-center text-primary flex items-center justify-center gap-2">
-          <Store className="w-8 h-8" />
+        <h1 className="font-display font-extrabold text-xl sm:text-2xl text-center text-primary flex items-center justify-center gap-2">
+          <Store className="w-6 h-6 sm:w-8 sm:h-8" />
           Tienda de Barrio
         </h1>
         <input
-          className="w-full border border-stone/30 p-2 rounded font-sans text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full border border-stone/30 p-2.5 sm:p-2 rounded font-sans text-ink focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
           placeholder="Usuario"
           value={loginInput}
           onChange={(e) => setLoginInput(e.target.value)}
         />
         <input
-          className="w-full border border-stone/30 p-2 rounded font-sans text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full border border-stone/30 p-2.5 sm:p-2 rounded font-sans text-ink focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
           type="password"
           placeholder="Contraseña"
           value={contrasena}
           onChange={(e) => setContrasena(e.target.value)}
         />
         {error && <p className="text-danger text-sm font-sans">{error}</p>}
-        <button className="w-full bg-primary text-white p-2 rounded font-sans font-semibold hover:bg-primary-dark transition-colors">
+        <button className="w-full bg-primary text-white p-2.5 sm:p-2 rounded font-sans font-semibold hover:bg-primary-dark transition-colors text-sm sm:text-base">
           Iniciar sesión
         </button>
       </form>

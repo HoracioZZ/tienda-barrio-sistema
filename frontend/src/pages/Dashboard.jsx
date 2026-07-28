@@ -184,19 +184,19 @@ export default function Dashboard() {
           titulo={`${esAdmin ? "Bienvenida" : "Bienvenido"}, ${usuario?.nombre || ""}`}
         />
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {cargando ? (
             <p className="text-stone font-sans">Cargando panel...</p>
           ) : esAdmin ? (
             <>
               {/* Tarjetas de estadisticas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-5">
+                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-4 sm:p-5">
                   <p className="text-stone text-sm font-sans mb-1 flex items-center gap-1">
                     <TrendingUp className="w-3.5 h-3.5" />
                     Ventas del Mes
                   </p>
-                  <p className="font-mono text-2xl font-bold text-ink">
+                  <p className="font-mono text-xl sm:text-2xl font-bold text-ink">
                     {formatMoney(totalVentasMes)}
                   </p>
                   <p className="text-xs text-stone mt-1">
@@ -204,12 +204,12 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-5">
+                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-4 sm:p-5">
                   <p className="text-stone text-sm font-sans mb-1 flex items-center gap-1">
                     <Truck className="w-3.5 h-3.5" />
                     Pedidos Activos
                   </p>
-                  <p className="font-mono text-2xl font-bold text-ink">
+                  <p className="font-mono text-xl sm:text-2xl font-bold text-ink">
                     {pedidosActivos.length}
                   </p>
                   <p className="text-xs text-stone mt-1">
@@ -217,12 +217,12 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-5">
+                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-4 sm:p-5">
                   <p className="text-stone text-sm font-sans mb-1 flex items-center gap-1">
                     <Package className="w-3.5 h-3.5" />
                     Stock Total
                   </p>
-                  <p className="font-mono text-2xl font-bold text-ink">
+                  <p className="font-mono text-xl sm:text-2xl font-bold text-ink">
                     {stockTotal}
                   </p>
                   {productosStockBajo.length > 0 && (
@@ -232,12 +232,12 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-5">
+                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-4 sm:p-5">
                   <p className="text-stone text-sm font-sans mb-1 flex items-center gap-1">
                     <Users className="w-3.5 h-3.5" />
                     Clientes Totales
                   </p>
-                  <p className="font-mono text-2xl font-bold text-ink">
+                  <p className="font-mono text-xl sm:text-2xl font-bold text-ink">
                     {clientesActivos.length}
                   </p>
                 </div>
@@ -251,7 +251,7 @@ export default function Dashboard() {
                     Ventas — últimos 7 días
                   </p>
 
-                  <div className="flex items-end gap-3 h-40">
+                  <div className="flex items-end gap-2 sm:gap-3 h-32 sm:h-40">
                     {ventasPorDia.map(({ dia, total }) => {
                       const alturaPx = Math.max(2, (total / maxVentaDia) * 140);
                       return (
@@ -312,7 +312,7 @@ export default function Dashboard() {
 
               {/* Actividad reciente */}
               <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-stone/10">
+                <div className="px-3 py-2 sm:px-5 sm:py-4 border-b border-stone/10">
                   <p className="font-display font-semibold text-ink flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
                     Ventas recientes
@@ -321,16 +321,16 @@ export default function Dashboard() {
                 <table className="w-full text-left">
                   <thead className="bg-cream/50">
                     <tr>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         #Venta
                       </th>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         Cliente
                       </th>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         Fecha
                       </th>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         Monto
                       </th>
                     </tr>
@@ -340,7 +340,7 @@ export default function Dashboard() {
                       <tr>
                         <td
                           colSpan={4}
-                          className="px-5 py-6 text-center text-stone"
+                          className="px-3 py-4 sm:px-5 sm:py-6 text-center text-stone"
                         >
                           No hay ventas registradas todavía
                         </td>
@@ -348,16 +348,16 @@ export default function Dashboard() {
                     )}
                     {ventasRecientes.map((v) => (
                       <tr key={v.id_venta} className="border-t border-stone/10">
-                        <td className="px-5 py-3 text-sm font-mono text-ink">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm font-mono text-ink">
                           #{v.id_venta}
                         </td>
-                        <td className="px-5 py-3 text-sm text-ink">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm text-ink">
                           {v.cliente ? v.cliente.nombre : "Sin cliente"}
                         </td>
-                        <td className="px-5 py-3 text-sm text-stone">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm text-stone">
                           {new Date(v.fecha).toLocaleString("es-BO")}
                         </td>
-                        <td className="px-5 py-3 text-sm font-mono font-semibold text-ink">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm font-mono font-semibold text-ink">
                           {formatMoney(v.total)}
                         </td>
                       </tr>
@@ -370,12 +370,12 @@ export default function Dashboard() {
             <>
               {/* Vista para Vendedor */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-5">
+                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-4 sm:p-5">
                   <p className="text-stone text-sm font-sans mb-1 flex items-center gap-1">
                     <ShoppingCart className="w-3.5 h-3.5" />
                     Mis Ventas Hoy
                   </p>
-                  <p className="font-mono text-2xl font-bold text-ink">
+                  <p className="font-mono text-xl sm:text-2xl font-bold text-ink">
                     {formatMoney(totalMisVentasHoy)}
                   </p>
                   <p className="text-xs text-stone mt-1">
@@ -383,7 +383,7 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-5">
+                <div className="bg-white rounded-xl shadow-sm border-l-4 border-primary p-4 sm:p-5">
                   <p className="text-stone text-sm font-sans mb-1 flex items-center gap-1">
                     <User className="w-3.5 h-3.5" />
                     Top Cliente
@@ -409,7 +409,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <Link
                   to="/ventas"
-                  className="flex items-center justify-between bg-primary hover:bg-primary-dark text-white rounded-xl p-5 transition-colors"
+                  className="flex items-center justify-between bg-primary hover:bg-primary-dark text-white rounded-xl p-4 sm:p-5 transition-colors"
                 >
                   <span className="font-display font-semibold flex items-center gap-2">
                     <ShoppingCart className="w-4 h-4" />
@@ -419,7 +419,7 @@ export default function Dashboard() {
                 </Link>
                 <Link
                   to="/clientes"
-                  className="flex items-center justify-between bg-white hover:bg-cream text-ink rounded-xl shadow-sm p-5 transition-colors"
+                  className="flex items-center justify-between bg-white hover:bg-cream text-ink rounded-xl shadow-sm p-4 sm:p-5 transition-colors"
                 >
                   <span className="font-display font-semibold flex items-center gap-2">
                     <Users className="w-4 h-4" />
@@ -431,7 +431,7 @@ export default function Dashboard() {
 
               {/* Mis ventas recientes */}
               <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-stone/10">
+                <div className="px-3 py-2 sm:px-5 sm:py-4 border-b border-stone/10">
                   <p className="font-display font-semibold text-ink flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
                     Mis ventas recientes
@@ -440,16 +440,16 @@ export default function Dashboard() {
                 <table className="w-full text-left">
                   <thead className="bg-cream/50">
                     <tr>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         #Venta
                       </th>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         Cliente
                       </th>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         Fecha
                       </th>
-                      <th className="px-5 py-2 text-xs font-medium text-stone uppercase">
+                      <th className="px-3 py-1 sm:px-5 sm:py-2 text-xs font-medium text-stone uppercase">
                         Monto
                       </th>
                     </tr>
@@ -459,7 +459,7 @@ export default function Dashboard() {
                       <tr>
                         <td
                           colSpan={4}
-                          className="px-5 py-6 text-center text-stone"
+                          className="px-3 py-4 sm:px-5 sm:py-6 text-center text-stone"
                         >
                           Aún no has registrado ventas
                         </td>
@@ -467,16 +467,16 @@ export default function Dashboard() {
                     )}
                     {misVentasRecientes.map((v) => (
                       <tr key={v.id_venta} className="border-t border-stone/10">
-                        <td className="px-5 py-3 text-sm font-mono text-ink">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm font-mono text-ink">
                           #{v.id_venta}
                         </td>
-                        <td className="px-5 py-3 text-sm text-ink">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm text-ink">
                           {v.cliente ? v.cliente.nombre : "Sin cliente"}
                         </td>
-                        <td className="px-5 py-3 text-sm text-stone">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm text-stone">
                           {new Date(v.fecha).toLocaleString("es-BO")}
                         </td>
-                        <td className="px-5 py-3 text-sm font-mono font-semibold text-ink">
+                        <td className="px-3 py-2 sm:px-5 sm:py-3 text-sm font-mono font-semibold text-ink">
                           {formatMoney(v.total)}
                         </td>
                       </tr>

@@ -222,10 +222,10 @@ export default function Clientes() {
   return (
     <div className="flex min-h-screen bg-cream">
       <SidebarClientes />
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <HeaderModulo titulo=" Gestión de Clientes" />
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="text-sm text-stone">
               Total: {clientes.length} clientes
@@ -234,7 +234,7 @@ export default function Clientes() {
 
           {mensaje.texto && (
             <div
-              className={`mb-4 p-4 rounded-lg flex items-center gap-2 ${
+              className={`mb-4 p-3 sm:p-4 rounded-lg flex items-center gap-2 text-sm ${
                 mensaje.tipo === "success"
                   ? "bg-success/10 text-success border border-success/20"
                   : "bg-danger/10 text-danger border border-danger/20"
@@ -245,22 +245,22 @@ export default function Clientes() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Columna Izquierda */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="md:col-span-2 space-y-4">
               {/* Formulario de registro - Visible para todos */}
-              <div className="bg-white rounded-xl shadow-sm p-5 border border-stone/20">
-                <h3 className="font-semibold text-ink mb-3 flex items-center gap-2">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-5 border border-stone/20">
+                <h3 className="font-semibold text-ink mb-3 flex items-center gap-2 text-base sm:text-lg">
                   <span className="text-xl"></span> Registrar Nuevo Cliente
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     placeholder="Nombre completo"
                     value={form.nombre}
                     onChange={(e) =>
                       setForm({ ...form, nombre: e.target.value })
                     }
-                    className="px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                    className="px-3 py-2 text-sm sm:text-base border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                   />
                   <input
                     placeholder="Teléfono"
@@ -268,13 +268,13 @@ export default function Clientes() {
                     onChange={(e) =>
                       setForm({ ...form, telefono: e.target.value })
                     }
-                    className="px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                    className="px-3 py-2 text-sm sm:text-base border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                   />
                 </div>
                 <button
                   onClick={registrarCliente}
                   disabled={loadingRegistro}
-                  className="mt-3 w-full bg-primary hover:bg-primary-dark text-white font-semibold px-4 py-2 rounded-lg disabled:opacity-50 transition-colors duration-200 flex items-center justify-center gap-2 font-sans"
+                  className="mt-3 w-full bg-primary hover:bg-primary-dark text-white font-semibold px-4 py-2 rounded-lg disabled:opacity-50 transition-colors duration-200 flex items-center justify-center gap-2 font-sans text-sm sm:text-base"
                 >
                   {loadingRegistro ? (
                     <>
@@ -292,7 +292,7 @@ export default function Clientes() {
                   placeholder=" Buscar por código, nombre o teléfono..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full px-4 py-3 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans bg-white"
+                  className="w-full px-4 py-3 text-sm sm:text-base border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans bg-white"
                 />
                 {search && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-stone">
@@ -304,28 +304,28 @@ export default function Clientes() {
               {/* Tabla de clientes */}
               <div className="bg-white rounded-xl shadow-sm border border-stone/20 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm sm:text-base">
                     <thead className="bg-primary text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Código
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Nombre
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Teléfono
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Puntos
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Descuento
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Estado
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
+                        <th className="px-2 py-2 sm:px-4 sm:py-3 text-left text-xs font-semibold uppercase tracking-wider font-sans">
                           Acción
                         </th>
                       </tr>
@@ -335,9 +335,9 @@ export default function Clientes() {
                         <tr>
                           <td
                             colSpan="7"
-                            className="text-center py-8 text-stone"
+                            className="text-center py-6 sm:py-8 text-stone"
                           >
-                            <div className="flex items-center justify-center gap-2">
+                            <div className="flex items-center justify-center gap-2 text-sm sm:text-base">
                               <span className="animate-spin"></span> Cargando
                               clientes...
                             </div>
@@ -351,24 +351,24 @@ export default function Clientes() {
                               index % 2 === 0 ? "bg-white" : "bg-cream/50"
                             }`}
                           >
-                            <td className="px-4 py-3 text-sm font-mono text-stone">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-mono text-stone">
                               {c.id_cliente}
                             </td>
-                            <td className="px-4 py-3 text-sm font-medium text-ink">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium text-ink">
                               {resaltarTexto(c.nombre, search)}
                             </td>
-                            <td className="px-4 py-3 text-sm text-stone">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-stone">
                               {resaltarTexto(c.telefono, search)}
                             </td>
-                            <td className="px-4 py-3 text-sm font-semibold text-primary">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-semibold text-primary">
                               {c.puntos ?? 0}
                             </td>
-                            <td className="px-4 py-3 text-sm text-stone">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-stone">
                               {c.descuento ?? 0}%
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3">
                               <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                className={`px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                                   c.estado !== false
                                     ? "bg-success/20 text-success"
                                     : "bg-danger/20 text-danger"
@@ -377,10 +377,10 @@ export default function Clientes() {
                                 {c.estado !== false ? "Activo" : "Inactivo"}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-2 py-2 sm:px-4 sm:py-3">
                               <button
                                 onClick={() => seleccionarCliente(c)}
-                                className="text-primary hover:text-primary-dark text-sm font-medium transition-colors hover:underline"
+                                className="text-primary hover:text-primary-dark text-xs sm:text-sm font-medium transition-colors hover:underline"
                               >
                                 {isAdmin ? "Editar" : "Ver"}
                               </button>
@@ -391,7 +391,7 @@ export default function Clientes() {
                         <tr>
                           <td
                             colSpan="7"
-                            className="text-center py-12 text-stone"
+                            className="text-center py-8 sm:py-12 text-stone"
                           >
                             <div className="text-4xl mb-2"></div>
                             {search
@@ -407,9 +407,9 @@ export default function Clientes() {
             </div>
 
             {/* Columna Derecha - Panel de edición/vista */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm border border-stone/20 p-5 sticky top-6">
-                <h3 className="font-semibold text-ink mb-4 flex items-center gap-2">
+            <div className="md:col-span-1">
+              <div className="bg-white rounded-xl shadow-sm border border-stone/20 p-4 sm:p-5 sticky top-6">
+                <h3 className="font-semibold text-ink mb-4 flex items-center gap-2 text-base sm:text-lg">
                   <span className="text-xl"></span>{" "}
                   {isAdmin ? "Editar Cliente" : "Detalles del Cliente"}
                 </h3>
@@ -437,7 +437,7 @@ export default function Clientes() {
                           onChange={(e) =>
                             setSelected({ ...selected, nombre: e.target.value })
                           }
-                          className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                          className="w-full px-3 py-2 text-sm border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                         />
                       ) : (
                         <div className="text-sm font-medium text-ink bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
@@ -460,7 +460,7 @@ export default function Clientes() {
                               telefono: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                          className="w-full px-3 py-2 text-sm border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                         />
                       ) : (
                         <div className="text-sm text-ink bg-cream/50 px-3 py-2 rounded-lg border border-stone/20">
@@ -484,7 +484,7 @@ export default function Clientes() {
                               puntos: Number(e.target.value),
                             })
                           }
-                          className="w-full px-3 py-2 border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
+                          className="w-full px-3 py-2 text-sm border border-stone/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans"
                           min="0"
                         />
                       ) : (
@@ -536,7 +536,7 @@ export default function Clientes() {
 
                       {/* Solo Admin ve los botones de acción */}
                       {isAdmin && (
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                           <button
                             onClick={toggleEstadoCliente}
                             disabled={updating}
@@ -581,7 +581,7 @@ export default function Clientes() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-stone">
+                  <div className="text-center py-8 sm:py-12 text-stone">
                     <MousePointer className="w-12 h-12 mx-auto mb-4 text-stone/50" />
                     <p className="font-medium text-ink">
                       Selecciona un cliente

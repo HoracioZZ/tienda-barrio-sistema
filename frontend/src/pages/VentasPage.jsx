@@ -23,9 +23,7 @@ import {
 } from "lucide-react";
 
 function VentasPage() {
-  const [tab, setTab] = useState("pos"); // "pos" | "historial"
-
-  // ---- Estado del POS ----
+  const [tab, setTab] = useState("pos");
   const [query, setQuery] = useState("");
   const [resultados, setResultados] = useState([]);
   const [carrito, setCarrito] = useState([]);
@@ -35,7 +33,6 @@ function VentasPage() {
   const [registrando, setRegistrando] = useState(false);
   const debounceRef = useRef(null);
 
-  // ---- Estado para Cliente en POS ----
   const [clientes, setClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
@@ -44,7 +41,6 @@ function VentasPage() {
   const [busquedaCliente, setBusquedaCliente] = useState("");
   const selectorRef = useRef(null);
 
-  // ---- Estado del Historial ----
   const [ventas, setVentas] = useState([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(false);
   const [desde, setDesde] = useState("");
@@ -98,15 +94,12 @@ function VentasPage() {
     }
   }
 
-  // RF-4: busqueda en tiempo real con debounce (300ms)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-
     if (query.trim().length === 0) {
       setResultados([]);
       return;
     }
-
     debounceRef.current = setTimeout(async () => {
       setBuscando(true);
       try {
@@ -118,7 +111,6 @@ function VentasPage() {
         setBuscando(false);
       }
     }, 300);
-
     return () => clearTimeout(debounceRef.current);
   }, [query]);
 
@@ -191,7 +183,6 @@ function VentasPage() {
     0,
   );
 
-  // Calcular total con descuento
   const descuentoAplicado = clienteSeleccionado?.descuento || 0;
   const totalConDescuento = total * (1 - descuentoAplicado / 100);
   const ahorro = total - totalConDescuento;
@@ -203,7 +194,6 @@ function VentasPage() {
       setError("Agrega al menos un producto antes de registrar la venta");
       return;
     }
-
     setRegistrando(true);
     try {
       const payload = {
@@ -212,17 +202,12 @@ function VentasPage() {
           cantidad: it.cantidad,
         })),
       };
-
       const clienteId = clienteSeleccionado?.id_cliente;
       if (clienteId) {
         payload.id_cliente = clienteId;
       }
-
-      // Enviar total con descuento
       payload.total = totalConDescuento;
-
       const venta = await registrarVenta(payload);
-
       if (clienteId) {
         try {
           await api.patch(`/clientes/${clienteId}/sumar-punto`);
@@ -231,11 +216,9 @@ function VentasPage() {
           console.error("Error sumando punto:", puntoError);
         }
       }
-
       const mensajeCliente = clienteSeleccionado
         ? ` con cliente ${clienteSeleccionado.nombre} (${descuentoAplicado}% descuento aplicado)`
         : " (venta libre)";
-
       setExito(
         `Venta #${venta.id_venta} registrada correctamente${mensajeCliente}`,
       );
@@ -280,14 +263,14 @@ function VentasPage() {
   return (
     <div className="flex min-h-screen bg-cream">
       <SidebarVentas />
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <HeaderModulo titulo="Punto de Venta" />
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-stone/20">
+          <div className="flex gap-2 mb-4 sm:mb-6 border-b border-stone/20 overflow-x-auto">
             <button
               onClick={() => setTab("pos")}
-              className={`px-4 py-2 font-display font-semibold ${
+              className={`px-3 sm:px-4 py-2 font-display font-semibold text-sm sm:text-base whitespace-nowrap ${
                 tab === "pos"
                   ? "text-primary border-b-2 border-primary"
                   : "text-stone"
@@ -297,7 +280,7 @@ function VentasPage() {
             </button>
             <button
               onClick={() => setTab("historial")}
-              className={`px-4 py-2 font-display font-semibold ${
+              className={`px-3 sm:px-4 py-2 font-display font-semibold text-sm sm:text-base whitespace-nowrap ${
                 tab === "historial"
                   ? "text-primary border-b-2 border-primary"
                   : "text-stone"
@@ -311,35 +294,35 @@ function VentasPage() {
             <>
               {/* Selector de Cliente */}
               <div
-                className="bg-white rounded-lg shadow p-4 mb-4"
+                className="bg-white rounded-lg shadow p-3 sm:p-4 mb-4"
                 ref={selectorRef}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                     <span className="text-sm font-medium text-stone">
                       Cliente:
                     </span>
                     {clienteSeleccionado ? (
-                      <span className="text-ink font-semibold">
+                      <span className="text-ink font-semibold text-sm sm:text-base break-words">
                         {clienteSeleccionado.nombre}
-                        <span className="text-sm text-stone font-normal ml-1">
+                        <span className="text-xs sm:text-sm text-stone font-normal ml-1">
                           (Cód: {clienteSeleccionado.id_cliente} | Puntos:{" "}
                           {clienteSeleccionado.puntos ?? 0} | Descuento:{" "}
                           {clienteSeleccionado.descuento ?? 0}%)
                         </span>
                       </span>
                     ) : (
-                      <span className="text-stone">Venta libre</span>
+                      <span className="text-stone text-sm">Venta libre</span>
                     )}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {!clienteSeleccionado ? (
                       <button
                         onClick={() =>
                           setMostrarSelectorCliente(!mostrarSelectorCliente)
                         }
-                        className="bg-primary hover:bg-primary-dark text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                        className="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded text-xs sm:text-sm flex items-center gap-1"
                       >
                         <Search className="w-3.5 h-3.5" />
                         {mostrarSelectorCliente ? "Cerrar" : "Buscar cliente"}
@@ -347,7 +330,7 @@ function VentasPage() {
                     ) : (
                       <button
                         onClick={quitarCliente}
-                        className="bg-gray-200 hover:bg-gray-300 text-ink px-3 py-1 rounded text-sm flex items-center gap-1"
+                        className="bg-gray-200 hover:bg-gray-300 text-ink px-3 py-1.5 rounded text-xs sm:text-sm flex items-center gap-1"
                       >
                         <X className="w-3.5 h-3.5" />
                         Quitar
@@ -393,11 +376,11 @@ function VentasPage() {
 
                         <div className="max-h-64 overflow-y-auto border rounded-lg">
                           <div
-                            className="px-4 py-2.5 hover:bg-cream cursor-pointer border-b border-gray-100 flex items-center gap-2 transition-colors"
+                            className="px-3 sm:px-4 py-2 hover:bg-cream cursor-pointer border-b border-gray-100 flex items-center gap-2 transition-colors"
                             onClick={quitarCliente}
                           >
                             <User className="w-4 h-4 text-stone" />
-                            <span className="font-medium">
+                            <span className="font-medium text-sm">
                               Venta libre (sin cliente)
                             </span>
                           </div>
@@ -415,17 +398,17 @@ function VentasPage() {
                           {clientesFiltrados.map((cliente) => (
                             <div
                               key={cliente.id_cliente}
-                              className="px-4 py-2.5 hover:bg-cream cursor-pointer border-b border-gray-100 last:border-0 transition-colors flex items-center justify-between"
+                              className="px-3 sm:px-4 py-2 hover:bg-cream cursor-pointer border-b border-gray-100 last:border-0 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2"
                               onClick={() => seleccionarCliente(cliente)}
                             >
-                              <div className="flex-1">
-                                <div className="font-medium">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm sm:text-base truncate">
                                   {resaltarTexto(
                                     cliente.nombre,
                                     busquedaCliente,
                                   )}
                                 </div>
-                                <div className="text-xs text-stone flex gap-3 items-center">
+                                <div className="text-xs text-stone flex flex-wrap items-center gap-1 sm:gap-3">
                                   <span>Cód: {cliente.id_cliente}</span>
                                   <span>{cliente.telefono}</span>
                                   <span className="flex items-center gap-0.5">
@@ -438,7 +421,7 @@ function VentasPage() {
                                   </span>
                                 </div>
                               </div>
-                              <span className="text-primary text-sm font-medium ml-2">
+                              <span className="text-primary text-xs sm:text-sm font-medium ml-0 sm:ml-2">
                                 Seleccionar →
                               </span>
                             </div>
@@ -466,25 +449,27 @@ function VentasPage() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Buscar producto por nombre..."
-                    className="w-full rounded-lg border border-stone/30 pl-10 pr-4 py-3 text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-lg border border-stone/30 pl-10 pr-4 py-2.5 sm:py-3 text-sm sm:text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
                 {buscando && (
-                  <span className="absolute right-4 top-3 text-stone text-sm">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone text-xs sm:text-sm">
                     Buscando...
                   </span>
                 )}
 
                 {resultados.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white border border-stone/20 rounded-lg mt-1 shadow-lg max-h-64 overflow-y-auto">
+                  <ul className="absolute z-10 w-full bg-white border border-stone/20 rounded-lg mt-1 shadow-lg max-h-48 sm:max-h-64 overflow-y-auto">
                     {resultados.map((producto) => (
                       <li
                         key={producto.id_producto}
                         onClick={() => agregarAlCarrito(producto)}
-                        className="flex justify-between items-center px-4 py-2 cursor-pointer hover:bg-cream"
+                        className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center px-3 sm:px-4 py-2 cursor-pointer hover:bg-cream gap-1 sm:gap-0"
                       >
-                        <span className="text-ink">{producto.nombre}</span>
-                        <span className="font-mono text-sm text-stone">
+                        <span className="text-sm sm:text-base text-ink">
+                          {producto.nombre}
+                        </span>
+                        <span className="font-mono text-xs sm:text-sm text-stone">
                           Bs {Number(producto.precio_venta).toFixed(2)} · Stock:{" "}
                           {producto.stock}
                         </span>
@@ -496,83 +481,88 @@ function VentasPage() {
 
               {/* Carrito */}
               <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
-                <table className="w-full text-left">
-                  <thead className="bg-primary text-white">
-                    <tr>
-                      <th className="px-4 py-3">Producto</th>
-                      <th className="px-4 py-3">Precio unit.</th>
-                      <th className="px-4 py-3">Cantidad</th>
-                      <th className="px-4 py-3">Subtotal</th>
-                      <th className="px-4 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {carrito.length === 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm">
+                    <thead className="bg-primary text-white">
                       <tr>
-                        <td
-                          colSpan={5}
-                          className="px-4 py-6 text-center text-stone"
-                        >
-                          Aún no hay productos en la venta
-                        </td>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Producto</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">
+                          Precio unit.
+                        </th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Cantidad</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Subtotal</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3"></th>
                       </tr>
-                    )}
-                    {carrito.map((it) => (
-                      <tr
-                        key={it.id_producto}
-                        className="border-t border-stone/10"
-                      >
-                        <td className="px-4 py-3 text-ink">{it.nombre}</td>
-                        <td className="px-4 py-3 font-mono text-ink">
-                          Bs {it.precio_venta.toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            min={1}
-                            max={it.stock}
-                            value={it.cantidad}
-                            onChange={(e) =>
-                              actualizarCantidad(it.id_producto, e.target.value)
-                            }
-                            className="w-20 rounded border border-stone/30 px-2 py-1 font-mono"
-                          />
-                        </td>
-                        <td className="px-4 py-3 font-mono text-ink font-semibold">
-                          Bs {(it.precio_venta * it.cantidad).toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => quitarDelCarrito(it.id_producto)}
-                            className="text-danger hover:underline text-sm flex items-center gap-1"
+                    </thead>
+                    <tbody>
+                      {carrito.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-4 py-6 text-center text-stone"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Quitar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                            Aún no hay productos en la venta
+                          </td>
+                        </tr>
+                      )}
+                      {carrito.map((it) => (
+                        <tr
+                          key={it.id_producto}
+                          className="border-t border-stone/10"
+                        >
+                          <td className="px-2 sm:px-4 py-2 sm:py-3 text-ink text-xs sm:text-sm">
+                            {it.nombre}
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3 font-mono text-xs sm:text-sm text-ink">
+                            Bs {it.precio_venta.toFixed(2)}
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <input
+                              type="number"
+                              min={1}
+                              max={it.stock}
+                              value={it.cantidad}
+                              onChange={(e) =>
+                                actualizarCantidad(
+                                  it.id_producto,
+                                  e.target.value,
+                                )
+                              }
+                              className="w-14 sm:w-20 rounded border border-stone/30 px-1 sm:px-2 py-0.5 sm:py-1 font-mono text-xs sm:text-sm"
+                            />
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3 font-mono text-xs sm:text-sm text-ink font-semibold">
+                            Bs {(it.precio_venta * it.cantidad).toFixed(2)}
+                          </td>
+                          <td className="px-2 sm:px-4 py-2 sm:py-3">
+                            <button
+                              onClick={() => quitarDelCarrito(it.id_producto)}
+                              className="text-danger hover:underline text-xs sm:text-sm flex items-center gap-0.5 sm:gap-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Quitar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Total y confirmar */}
-              <div className="flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg shadow p-6">
-                <div>
-                  {/* Precio original tachado si hay descuento */}
+              <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="w-full sm:w-auto">
                   {clienteSeleccionado && descuentoAplicado > 0 && (
                     <div className="text-sm text-stone line-through">
                       Bs {total.toFixed(2)}
                     </div>
                   )}
-
-                  <p className="font-mono text-2xl text-primary font-semibold">
+                  <p className="font-mono text-xl sm:text-2xl text-primary font-semibold">
                     Total: Bs {totalConDescuento.toFixed(2)}
                   </p>
-
-                  {/* Mostrar descuento aplicado */}
                   {clienteSeleccionado && descuentoAplicado > 0 && (
-                    <div className="text-sm">
+                    <div className="text-xs sm:text-sm">
                       <span className="text-success font-semibold">
                         {descuentoAplicado}% descuento aplicado
                       </span>
@@ -581,9 +571,8 @@ function VentasPage() {
                       </span>
                     </div>
                   )}
-
                   {clienteSeleccionado && (
-                    <p className="text-sm text-success mt-1">
+                    <p className="text-xs sm:text-sm text-success mt-1">
                       Cliente: {clienteSeleccionado.nombre} - Se sumarán puntos
                     </p>
                   )}
@@ -591,20 +580,20 @@ function VentasPage() {
                 <button
                   onClick={confirmarVenta}
                   disabled={registrando || carrito.length === 0}
-                  className="bg-primary hover:bg-primary-dark text-white font-display font-bold px-6 py-3 rounded-lg disabled:opacity-50 flex items-center gap-2"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white font-display font-bold px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
                 >
-                  <Check className="w-5 h-5" />
+                  <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                   {registrando ? "Registrando..." : "Confirmar Venta"}
                 </button>
               </div>
 
               {error && (
-                <p className="mt-4 text-danger bg-danger/10 px-4 py-2 rounded-lg">
+                <p className="mt-4 text-danger bg-danger/10 px-4 py-2 rounded-lg text-sm">
                   {error}
                 </p>
               )}
               {exito && (
-                <p className="mt-4 text-success bg-success/10 px-4 py-2 rounded-lg">
+                <p className="mt-4 text-success bg-success/10 px-4 py-2 rounded-lg text-sm">
                   {exito}
                 </p>
               )}
@@ -614,28 +603,28 @@ function VentasPage() {
           {tab === "historial" && (
             <>
               {/* Filtro de fechas */}
-              <div className="flex flex-wrap items-end gap-4 bg-white rounded-lg shadow p-4 mb-6">
-                <div>
+              <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-end gap-3 sm:gap-4 bg-white rounded-lg shadow p-3 sm:p-4 mb-6">
+                <div className="w-full sm:w-auto">
                   <label className="block text-sm text-stone mb-1">Desde</label>
                   <input
                     type="date"
                     value={desde}
                     onChange={(e) => setDesde(e.target.value)}
-                    className="rounded border border-stone/30 px-3 py-2"
+                    className="w-full sm:w-auto rounded border border-stone/30 px-3 py-2 text-sm"
                   />
                 </div>
-                <div>
+                <div className="w-full sm:w-auto">
                   <label className="block text-sm text-stone mb-1">Hasta</label>
                   <input
                     type="date"
                     value={hasta}
                     onChange={(e) => setHasta(e.target.value)}
-                    className="rounded border border-stone/30 px-3 py-2"
+                    className="w-full sm:w-auto rounded border border-stone/30 px-3 py-2 text-sm"
                   />
                 </div>
                 <button
                   onClick={cargarHistorial}
-                  className="bg-primary hover:bg-primary-dark text-white font-display font-semibold px-5 py-2 rounded-lg flex items-center gap-2"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white font-display font-semibold px-4 sm:px-5 py-2 rounded-lg flex items-center justify-center gap-2 text-sm"
                 >
                   <Filter className="w-4 h-4" />
                   Filtrar
@@ -657,74 +646,76 @@ function VentasPage() {
 
               {/* Tabla de historial */}
               <div className="bg-white rounded-lg shadow overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-primary text-white">
-                    <tr>
-                      <th className="px-4 py-3">#Venta</th>
-                      <th className="px-4 py-3">Fecha</th>
-                      <th className="px-4 py-3">Cliente</th>
-                      <th className="px-4 py-3">Productos</th>
-                      <th className="px-4 py-3">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cargandoHistorial && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm">
+                    <thead className="bg-primary text-white">
                       <tr>
-                        <td
-                          colSpan={5}
-                          className="px-4 py-6 text-center text-stone"
-                        >
-                          Cargando...
-                        </td>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">#Venta</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Fecha</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Cliente</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Productos</th>
+                        <th className="px-2 sm:px-4 py-2 sm:py-3">Total</th>
                       </tr>
-                    )}
-                    {!cargandoHistorial && ventas.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="px-4 py-6 text-center text-stone"
-                        >
-                          No hay ventas registradas en este rango
-                        </td>
-                      </tr>
-                    )}
-                    {!cargandoHistorial &&
-                      ventas.map((venta) => (
-                        <tr
-                          key={venta.id_venta}
-                          className="border-t border-stone/10"
-                        >
-                          <td className="px-4 py-3 text-ink font-mono">
-                            #{venta.id_venta}
-                          </td>
-                          <td className="px-4 py-3 text-ink">
-                            {new Date(venta.fecha).toLocaleString("es-BO")}
-                          </td>
-                          <td className="px-4 py-3 text-ink">
-                            {venta.cliente
-                              ? venta.cliente.nombre
-                              : "Sin cliente"}
-                          </td>
-                          <td className="px-4 py-3 text-stone text-sm">
-                            {venta.detalles.map((d) => (
-                              <div key={d.id_detalle}>
-                                {d.producto?.nombre ??
-                                  `Producto #${d.id_producto}`}{" "}
-                                × {d.cantidad}
-                              </div>
-                            ))}
-                          </td>
-                          <td className="px-4 py-3 font-mono text-ink font-semibold">
-                            Bs {Number(venta.total).toFixed(2)}
+                    </thead>
+                    <tbody>
+                      {cargandoHistorial && (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-4 py-6 text-center text-stone"
+                          >
+                            Cargando...
                           </td>
                         </tr>
-                      ))}
-                  </tbody>
-                </table>
+                      )}
+                      {!cargandoHistorial && ventas.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-4 py-6 text-center text-stone"
+                          >
+                            No hay ventas registradas en este rango
+                          </td>
+                        </tr>
+                      )}
+                      {!cargandoHistorial &&
+                        ventas.map((venta) => (
+                          <tr
+                            key={venta.id_venta}
+                            className="border-t border-stone/10"
+                          >
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 text-ink font-mono text-xs sm:text-sm">
+                              #{venta.id_venta}
+                            </td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 text-ink text-xs sm:text-sm">
+                              {new Date(venta.fecha).toLocaleString("es-BO")}
+                            </td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 text-ink text-xs sm:text-sm">
+                              {venta.cliente
+                                ? venta.cliente.nombre
+                                : "Sin cliente"}
+                            </td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 text-stone text-xs sm:text-sm">
+                              {venta.detalles.map((d) => (
+                                <div key={d.id_detalle}>
+                                  {d.producto?.nombre ??
+                                    `Producto #${d.id_producto}`}{" "}
+                                  × {d.cantidad}
+                                </div>
+                              ))}
+                            </td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 font-mono text-ink font-semibold text-xs sm:text-sm">
+                              Bs {Number(venta.total).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {errorHistorial && (
-                <p className="mt-4 text-danger bg-danger/10 px-4 py-2 rounded-lg">
+                <p className="mt-4 text-danger bg-danger/10 px-4 py-2 rounded-lg text-sm">
                   {errorHistorial}
                 </p>
               )}
