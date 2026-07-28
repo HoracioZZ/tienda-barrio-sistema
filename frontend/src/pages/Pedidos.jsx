@@ -18,6 +18,7 @@ import {
   MoreVertical,
   FileText,
 } from "lucide-react";
+import ImagenProducto from "../components/ImagenProducto";
 
 function Pedidos() {
   const [proveedores, setProveedores] = useState([]);
@@ -234,10 +235,16 @@ function Pedidos() {
                             type="button"
                             key={p.id_producto}
                             onClick={() => seleccionarProducto(p)}
-                            className="w-full text-left px-3 py-2 hover:bg-cream text-sm text-ink font-sans flex justify-between"
+                            className="w-full text-left px-3 py-2 hover:bg-cream text-sm text-ink font-sans flex items-center gap-3"
                           >
-                            <span>{p.nombre}</span>
-                            <span className="font-mono text-stone">
+                            <ImagenProducto
+                              url={p.url_imagen}
+                              nombre={p.nombre}
+                              className="w-8 h-8 rounded-lg border border-stone/20 shrink-0"
+                              fallbackText="📦"
+                            />
+                            <span className="flex-1 truncate">{p.nombre}</span>
+                            <span className="font-mono text-stone shrink-0">
                               Bs {p.precio_compra}
                             </span>
                           </button>

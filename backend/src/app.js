@@ -15,9 +15,12 @@ const alertaRoutes = require('./routes/alerta.routes');
 const app = express();
 
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', mensaje: 'API Tienda de Barrio funcionando' });

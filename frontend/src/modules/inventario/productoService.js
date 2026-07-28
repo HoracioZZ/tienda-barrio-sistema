@@ -34,3 +34,13 @@ export async function alertasStockBajo() {
   const { data } = await api.get("/productos/alertas/stock-bajo");
   return data;
 }
+
+// Nueva función para subir imagen
+export async function subirImagenProducto(id_producto, formData) {
+  const { data } = await api.post(`/productos/${id_producto}/imagen`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+}

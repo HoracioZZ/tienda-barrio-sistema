@@ -114,12 +114,23 @@ async function listarVentas({ desde, hasta } = {}) {
 async function buscarProductosPorNombre(nombre) {
   return prisma.producto.findMany({
     where: {
-      estado: true,
       nombre: { contains: nombre, mode: "insensitive" },
+      estado: true,
     },
-    orderBy: { nombre: "asc" },
+    select: {
+      id_producto: true,
+      nombre: true,
+      precio_venta: true,
+      stock: true,
+      url_imagen: true, // ← AGREGAR ESTO
+      categoria: {
+        select: { nombre: true },
+      },
+    },
+    take: 20,
   });
 }
+
 module.exports = {
   ejecutarTransaccion,
   obtenerProductoPorId,
